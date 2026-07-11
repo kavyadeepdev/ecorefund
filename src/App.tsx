@@ -54,7 +54,7 @@ export default function App() {
               <Recycle className="w-6 h-6" />
             </div>
             <span className="text-xl font-display font-bold tracking-tight text-slate-900">
-              EcoRefund India
+              Eco Refund
             </span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -85,7 +85,7 @@ export default function App() {
               A Tech-Enabled <span className="text-brand-500">Deposit Refund Scheme</span> for India
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed font-medium max-w-lg">
-              Inspired by Germany's Pfand system, modernized for India. Rewarding citizens with instant UPI payouts for 100% source-segregated waste.
+              A tech-enabled deposit refund scheme designed to incentivize proper waste disposal. Rewarding citizens with instant UPI payouts for 100% source-segregated waste.
             </p>
             <div className="flex flex-wrap gap-4">
               <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3">
@@ -261,7 +261,7 @@ export default function App() {
       </main>
 
       <footer className="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
-        <p className="flex items-center justify-center gap-2 mb-2"><Recycle className="w-5 h-5 text-brand-500" /> EcoRefund India</p>
+        <p className="flex items-center justify-center gap-2 mb-2"><Recycle className="w-5 h-5 text-brand-500" /> Eco Refund</p>
         <p className="text-sm">Interactive Policy Framework & Proposal Dashboard</p>
       </footer>
     </div>

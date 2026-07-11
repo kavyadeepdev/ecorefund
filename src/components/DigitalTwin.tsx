@@ -578,7 +578,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             </div>
             <div>
               <span className="text-base font-bold tracking-tight text-white block">
-                EcoRefund India
+                Eco Refund
               </span>
               <span className="text-xs text-slate-400 font-mono">
                 DRS Digital Twin v2.5 // Smart Scanner
