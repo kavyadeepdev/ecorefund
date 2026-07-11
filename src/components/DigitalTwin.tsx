@@ -11,10 +11,8 @@ interface DigitalTwinProps {
 }
 
 export default function DigitalTwin({ onClose }: DigitalTwinProps) {
-  // Navigation & Session Steps
-  // Steps: 'UNAUTHENTICATED' | 'SCANNING_QR' | 'CONNECTED'
   const [sessionStep, setSessionStep] = useState<'UNAUTHENTICATED' | 'SCANNING_QR' | 'CONNECTED'>('UNAUTHENTICATED');
-  
+
   // App Wallet Balance
   const [walletBalance, setWalletBalance] = useState(150.00);
   const [carbonSaved, setCarbonSaved] = useState(8.5);
@@ -69,12 +67,12 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
     setLogs((prev) => [...prev, { id: Math.random().toString(), time: timeStr, msg, type }]);
   };
 
-  // 1. Phone App Scan Click
+  // Phone App Scan Click
   const handleInitiateScan = () => {
     if (sessionStep !== 'UNAUTHENTICATED') return;
     setSessionStep('SCANNING_QR');
     addLog('RVM Optical Scanner: Laser alignment triggered.', 'info');
-    
+
     setTimeout(() => {
       setSessionStep('CONNECTED');
       addLog(`[MQTT] authenticated: rvm/001/session {"user": "Aarav Sharma", "token": "${userQrToken}"}`, 'mqtt');
@@ -85,7 +83,7 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
   // Helper to parse file name keyword-based heuristics
   const analyzeFileName = (filename: string): DepositItem => {
     const nameLower = filename.toLowerCase();
-    
+
     if (nameLower.includes('sand') || nameLower.includes('rock') || nameLower.includes('stone') || nameLower.includes('weight')) {
       return {
         id: Math.random().toString(),
@@ -168,25 +166,32 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
     };
   };
 
-  // Run CV classification process using OpenAI Vision API if configured
+  // Run CV classification process using OpenRouter Vision API if configured
   const runCvAnalysis = async (item: DepositItem, srcUrl: string) => {
     setCvScanning(true);
     setCvResult(null);
     setFallbackCalibrationOpen(false);
 
     const openAiKey = (import.meta as any).env.VITE_OPENAI_API_KEY;
-    const isRealOpenAiConfigured = openAiKey && 
-      openAiKey !== 'YOUR_API_KEY_HERE' && 
+    const openAiBaseUrl = (import.meta as any).env.VITE_OPENAI_BASE_URL;
+    const openAiModel = (import.meta as any).env.VITE_OPENAI_MODEL || "gpt-4o-mini";
+    const isRealOpenAiConfigured = openAiKey &&
+      openAiKey !== 'YOUR_API_KEY_HERE' &&
       openAiKey.trim().length > 0;
 
     if (srcUrl.startsWith('data:image/') && isRealOpenAiConfigured) {
-      setCvMessage('RVM LLM System: Analysing item validity with GPT-4o-mini...');
-      addLog(`[OpenAI] Dispatched image vision payload to gpt-4o-mini node.`, 'mqtt');
-      
+      setCvMessage(`RVM LLM System: Analysing item validity with ${openAiModel}...`);
+      addLog(`[AI Node] Dispatched image vision payload to ${openAiModel}.`, 'mqtt');
+
       try {
         const openai = new OpenAI({
           apiKey: openAiKey,
-          dangerouslyAllowBrowser: true
+          baseURL: openAiBaseUrl || undefined,
+          dangerouslyAllowBrowser: true,
+          defaultHeaders: {
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "EcoRefund DRS Digital Twin"
+          }
         });
 
         const systemPrompt = `You are the Computer Vision system inside an automated Reverse Vending Machine (RVM) and depot scale in India.
@@ -220,8 +225,11 @@ Format your output strictly as a JSON object with the following fields:
 }
 Do not return any markdown formatting outside the JSON block. Return ONLY the raw JSON string.`;
 
+        const supportsJsonMode = !openAiBaseUrl?.includes('openrouter.ai') &&
+          (openAiModel.startsWith('gpt-') || openAiModel.includes('gemini-2.5') || openAiModel.includes('gemini-1.5'));
+
         const response = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          model: openAiModel,
           messages: [
             {
               role: "system",
@@ -240,14 +248,21 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
               ]
             }
           ],
-          response_format: { type: "json_object" }
+          ...(supportsJsonMode ? { response_format: { type: "json_object" } } : {})
         });
 
-        const content = response.choices[0]?.message?.content || '{}';
-        addLog(`[OpenAI] Received vision response from gpt-4o-mini.`, 'mqtt');
-        
+        let content = response.choices[0]?.message?.content || '{}';
+        addLog(`[AI Node] Received vision response from ${openAiModel}.`, 'mqtt');
+
+        // Extract the JSON object substring from the response (handles leading/trailing text or markdown)
+        const firstBrace = content.indexOf('{');
+        const lastBrace = content.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          content = content.substring(firstBrace, lastBrace + 1);
+        }
+
         const parsed = JSON.parse(content);
-        
+
         const rate = parsed.type in RATES ? RATES[parsed.type as keyof typeof RATES] : 0;
         const val = parseFloat(((parsed.weightGrams / 100) * rate).toFixed(2));
 
@@ -271,18 +286,18 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
         }
 
       } catch (err: any) {
-        console.error("OpenAI vision error:", err);
+        console.error("AI vision error:", err);
         setCvScanning(false);
-        addLog(`[OpenAI] Error: ${err.message || 'Vision analysis failed'}. Falling back to local rules.`, 'warn');
+        addLog(`[AI Node] Error: ${err.message || 'Vision analysis failed'}. Falling back to local rules.`, 'warn');
         runLocalHeuristics(item);
       }
     } else {
       if (srcUrl.startsWith('data:image/')) {
-        addLog(`[OpenAI] Key not configured. Using high-fidelity local heuristic rules.`, 'info');
+        addLog(`[AI Node] Key not configured. Using high-fidelity local heuristic rules.`, 'info');
       } else {
-        addLog(`[OpenAI] Presets bypass active. Running telemetry simulation...`, 'info');
+        addLog(`[AI Node] Presets bypass active. Running telemetry simulation...`, 'info');
       }
-      
+
       setCvMessage('RVM CV System: Running deep object detection (YOLOv8)...');
       setTimeout(() => {
         setCvScanning(false);
@@ -320,10 +335,10 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
   // Handle Preset Image click
   const handleSelectPreset = (preset: typeof MOCK_PRESETS[number]) => {
     if (sessionStep !== 'CONNECTED' || chuteLocked) return;
-    
+
     setCvResult(null);
     setCvRejected(false);
-    
+
     const rate = preset.type in RATES ? RATES[preset.type as keyof typeof RATES] : 0;
     const val = (preset.weightGrams / 100) * rate;
 
@@ -357,7 +372,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
     reader.onload = () => {
       const srcUrl = reader.result as string;
       setUploadedImageSrc(srcUrl);
-      
+
       const parsedItem = analyzeFileName(file.name);
       runCvAnalysis(parsedItem, srcUrl);
     };
@@ -369,7 +384,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
     if (!cvResult) return;
     setCurrentSessionItems((prev) => [...prev, cvResult]);
     setBinFullness((prev) => Math.min(100, prev + Math.ceil(cvResult.weightGrams / 40)));
-    
+
     setUploadedImageSrc(null);
     setCvResult(null);
     setCvMessage('');
@@ -378,7 +393,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
   // Manual fallback selection if AI is unsure
   const handleCalibrateManual = (type: 'plastic' | 'paper' | 'glass' | 'compostable' | 'unsupported') => {
     setFallbackCalibrationOpen(false);
-    
+
     let weight = 30;
     let isContaminated = false;
     let rejectReason = undefined;
@@ -428,7 +443,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
     setTimeout(() => {
       setWalletBalance((prev) => prev + totalVal);
       setCarbonSaved((prev) => prev + parseFloat((totalWeight * 0.0016).toFixed(3)));
-      
+
       const newTx = {
         id: `tx-${Math.floor(100 + Math.random() * 900)}`,
         date: new Date().toISOString().split('T')[0],
@@ -457,7 +472,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={onClose}
               className="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl transition-all mr-2 flex items-center gap-2 text-sm font-medium cursor-pointer"
             >
@@ -486,14 +501,14 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
 
       {/* Main Panel grid */}
       <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* ================= LEFT PANEL: PHONE ================= */}
         <div className="lg:col-span-4 flex flex-col items-center">
           <div className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-2">
             <Smartphone className="w-4 h-4 text-emerald-400" />
             Citizen Mobile App
           </div>
-          
+
           <CitizenMobileApp
             sessionStep={sessionStep}
             walletBalance={walletBalance}
@@ -511,7 +526,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             <Recycle className="w-4 h-4 text-emerald-400" />
             Smart RVM Cabinet
           </div>
-          
+
           <SmartRvmCabinet
             sessionStep={sessionStep}
             currentSessionItems={currentSessionItems}
@@ -539,7 +554,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             <Terminal className="w-4 h-4 text-emerald-400" />
             Operator IoT Console
           </div>
-          
+
           <OperatorConsole
             chuteLocked={chuteLocked}
             setChuteLocked={setChuteLocked}
