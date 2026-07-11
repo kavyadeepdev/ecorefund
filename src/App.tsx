@@ -1,41 +1,14 @@
 import React, { useState } from 'react';
 import { 
   Recycle, Smartphone, Coins, AlertTriangle, 
-  ArrowRight, ShieldCheck, Truck, Factory, Leaf, Cpu
+  ArrowRight, ShieldCheck, Truck, Factory, Leaf
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import Calculator from './components/Calculator';
 import DigitalTwin from './components/DigitalTwin';
-
-function Section({ id, title, icon: Icon, children }: { id: string, title: string, icon: any, children: React.ReactNode }) {
-  return (
-    <motion.section 
-      id={id}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      className="scroll-mt-32"
-    >
-      <div className="flex items-center gap-4 mb-8">
-        <div className="bg-brand-100 text-brand-700 p-3 rounded-2xl">
-          <Icon className="w-8 h-8" />
-        </div>
-        <h2 className="text-3xl font-display font-bold text-slate-900 tracking-tight">{title}</h2>
-      </div>
-      {children}
-    </motion.section>
-  );
-}
-
-function MetricCard({ title, value, label }: { title: string, value: string, label: string }) {
-  return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col justify-center">
-      <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">{title}</h4>
-      <div className="text-4xl font-display font-bold text-brand-600 mb-1">{value}</div>
-      <p className="text-sm text-slate-600">{label}</p>
-    </div>
-  );
-}
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Section from './components/Section';
+import MetricCard from './components/MetricCard';
 
 export default function App() {
   const [showDigitalTwin, setShowDigitalTwin] = useState(false);
@@ -47,31 +20,7 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-brand-500 text-white p-2 rounded-xl">
-              <Recycle className="w-6 h-6" />
-            </div>
-            <span className="text-xl font-display font-bold tracking-tight text-slate-900">
-              Eco Refund
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#vision" className="hover:text-brand-600 transition-colors">Vision</a>
-            <a href="#mechanism" className="hover:text-brand-600 transition-colors">Mechanism</a>
-            <a href="#tech" className="hover:text-brand-600 transition-colors">Tech Stack</a>
-            <a href="#economy" className="hover:text-brand-600 transition-colors">Economics</a>
-            <a href="#challenges" className="hover:text-brand-600 transition-colors">Roadmap</a>
-            <button 
-              onClick={() => setShowDigitalTwin(true)} 
-              className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer text-xs flex items-center gap-1.5"
-            >
-              <Cpu className="w-3.5 h-3.5" /> Demo Twin
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar onLaunchDigitalTwin={() => setShowDigitalTwin(true)} />
 
       <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32">
         {/* Hero Section */}
@@ -260,11 +209,7 @@ export default function App() {
         </Section>
       </main>
 
-      <footer className="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
-        <p className="flex items-center justify-center gap-2 mb-2"><Recycle className="w-5 h-5 text-brand-500" /> Eco Refund</p>
-        <p className="text-sm">Interactive Policy Framework & Proposal Dashboard</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
-
