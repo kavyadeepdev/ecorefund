@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Recycle, Smartphone, Terminal } from 'lucide-react';
 import OpenAI from 'openai';
-import { DepositItem, RATES, MOCK_PRESETS } from './digital-twin/types';
+import { DepositItem, RATES, MOCK_PRESETS, RvmMachine, MOCK_RVM_MACHINES } from './digital-twin/types';
 import CitizenMobileApp from './digital-twin/CitizenMobileApp';
 import SmartRvmCabinet from './digital-twin/SmartRvmCabinet';
 import OperatorConsole from './digital-twin/OperatorConsole';
@@ -22,6 +22,61 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
     { id: 'tx-001', date: '2026-05-26', amount: 8.50, items: 3, status: 'Success' },
     { id: 'tx-002', date: '2026-05-25', amount: 14.00, items: 5, status: 'Success' },
   ]);
+
+  // Machine Selection States
+  const [selectedMachine, setSelectedMachine] = useState<RvmMachine>(MOCK_RVM_MACHINES[0]);
+  const [machineWarning, setMachineWarning] = useState<string | null>(null);
+
+  const handleMachineChange = (newMachine: RvmMachine) => {
+    setSelectedMachine(newMachine);
+    addLog(`RVM Connection: Switched station to ${newMachine.name}.`, 'info');
+
+    if (currentSessionItems.length > 0) {
+      // Find incompatible items
+      const incompatible = currentSessionItems.filter((item) => {
+        const isSupported = item.type === 'sand'
+          ? newMachine.acceptedMaterials.includes('plastic')
+          : newMachine.acceptedMaterials.includes(item.type as any);
+        return !isSupported;
+      });
+
+      if (incompatible.length > 0) {
+        const compatibleItems = currentSessionItems.filter((item) => {
+          const isSupported = item.type === 'sand'
+            ? newMachine.acceptedMaterials.includes('plastic')
+            : newMachine.acceptedMaterials.includes(item.type as any);
+          return isSupported;
+        });
+
+        setCurrentSessionItems(compatibleItems);
+
+        const names = incompatible.map((item) => item.name).join(', ');
+        const warnMsg = `Cleared ${incompatible.length} incompatible item(s) (${names}) because ${newMachine.name} does not accept those materials.`;
+        setMachineWarning(warnMsg);
+        addLog(`Safety alert: ${warnMsg}`, 'warn');
+
+        // Clear warning after 6 seconds
+        setTimeout(() => {
+          setMachineWarning(null);
+        }, 6000);
+      } else {
+        setMachineWarning(null);
+      }
+    } else {
+      setMachineWarning(null);
+    }
+
+    // Reset currently scanned/ingested item if unsupported on new machine
+    if (cvResult) {
+      const isSupported = cvResult.type === 'sand'
+        ? newMachine.acceptedMaterials.includes('plastic')
+        : newMachine.acceptedMaterials.includes(cvResult.type as any);
+      if (!isSupported) {
+        handleResetSlot();
+        addLog(`Reset scanner slot: current item is unsupported on the new station.`, 'warn');
+      }
+    }
+  };
 
   // RVM Cabinet State
   const [currentSessionItems, setCurrentSessionItems] = useState<DepositItem[]>([]);
@@ -317,6 +372,26 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
   };
 
   const processDetectionResult = (item: DepositItem) => {
+    const isSupported = item.type === 'sand'
+      ? selectedMachine.acceptedMaterials.includes('plastic')
+      : selectedMachine.acceptedMaterials.includes(item.type as any);
+
+    if (!isSupported) {
+      const rejectReason = `${selectedMachine.name} does not accept ${item.type === 'sand' ? 'plastic' : item.type} materials. Please select a compatible station or item.`;
+      const detectedItem: DepositItem = {
+        ...item,
+        isContaminated: true,
+        rejectReason,
+        val: 0
+      };
+      setCvRejected(true);
+      setCvResult(detectedItem);
+      setCvMessage(`REJECTED: ${rejectReason}`);
+      addLog(`Validation error: ${rejectReason}`, 'warn');
+      addLog(`[MQTT] post: rvm/001/reject {"filename": "${item.name}", "reason": "Station Incompatibility"}`, 'mqtt');
+      return;
+    }
+
     if (item.isContaminated || item.type === 'unsupported') {
       setCvRejected(true);
       setCvResult(item);
@@ -517,6 +592,10 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             qrTimer={qrTimer}
             transactions={transactions}
             handleInitiateScan={handleInitiateScan}
+            selectedMachine={selectedMachine}
+            setSelectedMachine={handleMachineChange}
+            machines={MOCK_RVM_MACHINES}
+            machineWarning={machineWarning}
           />
         </div>
 
@@ -539,6 +618,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             cvMessage={cvMessage}
             fallbackCalibrationOpen={fallbackCalibrationOpen}
             chuteLocked={chuteLocked}
+            selectedMachine={selectedMachine}
             handleFileUpload={handleFileUpload}
             handleSelectPreset={handleSelectPreset}
             handleConfirmItem={handleConfirmItem}

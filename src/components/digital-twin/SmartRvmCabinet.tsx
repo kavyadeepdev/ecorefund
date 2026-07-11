@@ -4,7 +4,7 @@ import {
   ShieldCheck, AlertTriangle, Check, Send 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DepositItem, MOCK_PRESETS } from './types';
+import { DepositItem, MOCK_PRESETS, RvmMachine } from './types';
 import ItemSVG from './ItemSVG';
 
 interface SmartRvmCabinetProps {
@@ -19,6 +19,7 @@ interface SmartRvmCabinetProps {
   cvMessage: string;
   fallbackCalibrationOpen: boolean;
   chuteLocked: boolean;
+  selectedMachine: RvmMachine;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectPreset: (preset: typeof MOCK_PRESETS[number]) => void;
   handleConfirmItem: () => void;
@@ -39,6 +40,7 @@ export default function SmartRvmCabinet({
   cvMessage,
   fallbackCalibrationOpen,
   chuteLocked,
+  selectedMachine,
   handleFileUpload,
   handleSelectPreset,
   handleConfirmItem,
@@ -283,24 +285,39 @@ export default function SmartRvmCabinet({
           <span className="text-[10px] text-slate-500 font-mono">Simulates camera ingestion</span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {MOCK_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              disabled={sessionStep !== 'CONNECTED' || cvScanning}
-              onClick={() => handleSelectPreset(preset)}
-              className={`text-left p-2.5 rounded-xl border transition-all flex flex-col text-xs relative ${
-                sessionStep !== 'CONNECTED' 
-                  ? 'opacity-40 cursor-not-allowed border-slate-800 bg-slate-900/10 text-slate-600'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 text-slate-300 cursor-pointer'
-              }`}
-            >
-              {preset.isContaminated && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              )}
-              <span className="font-semibold block truncate w-[90%]">{preset.name}</span>
-              <span className="text-[9px] text-slate-500 font-mono mt-0.5">{preset.weightGrams}g • {preset.type}</span>
-            </button>
-          ))}
+          {MOCK_PRESETS.map((preset) => {
+            const isSupported = preset.type === 'sand'
+              ? selectedMachine.acceptedMaterials.includes('plastic')
+              : selectedMachine.acceptedMaterials.includes(preset.type as any);
+
+            const isDisabled = sessionStep !== 'CONNECTED' || cvScanning || !isSupported;
+
+            return (
+              <button
+                key={preset.id}
+                disabled={isDisabled}
+                onClick={() => handleSelectPreset(preset)}
+                className={`text-left p-2.5 rounded-xl border transition-all flex flex-col text-xs relative ${
+                  sessionStep !== 'CONNECTED' 
+                    ? 'opacity-40 cursor-not-allowed border-slate-800 bg-slate-900/10 text-slate-600'
+                    : !isSupported
+                      ? 'opacity-30 cursor-not-allowed border-rose-950 bg-rose-950/10 text-rose-300'
+                      : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 text-slate-300 cursor-pointer'
+                }`}
+              >
+                {preset.isContaminated && isSupported && (
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                )}
+                {!isSupported && sessionStep === 'CONNECTED' && (
+                  <span className="absolute top-2.5 right-2.5 px-1 rounded bg-rose-500/20 text-[7px] font-bold text-rose-400 font-mono tracking-wide">
+                    UNSUPPORTED
+                  </span>
+                )}
+                <span className="font-semibold block truncate w-[90%]">{preset.name}</span>
+                <span className="text-[9px] text-slate-500 font-mono mt-0.5">{preset.weightGrams}g • {preset.type}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

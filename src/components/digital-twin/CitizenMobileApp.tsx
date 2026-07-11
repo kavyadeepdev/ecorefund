@@ -1,8 +1,9 @@
 import React from 'react';
 import { 
-  Smartphone, Zap, Recycle, Coins, Wifi, RefreshCw 
+  Smartphone, Zap, Recycle, Coins, Wifi, RefreshCw, ChevronDown, AlertTriangle 
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { RvmMachine } from './types';
 
 interface Transaction {
   id: string;
@@ -20,6 +21,10 @@ interface CitizenMobileAppProps {
   qrTimer: number;
   transactions: Transaction[];
   handleInitiateScan: () => void;
+  selectedMachine: RvmMachine;
+  setSelectedMachine: (machine: RvmMachine) => void;
+  machines: RvmMachine[];
+  machineWarning: string | null;
 }
 
 export default function CitizenMobileApp({
@@ -30,6 +35,10 @@ export default function CitizenMobileApp({
   qrTimer,
   transactions,
   handleInitiateScan,
+  selectedMachine,
+  setSelectedMachine,
+  machines,
+  machineWarning,
 }: CitizenMobileAppProps) {
   return (
     <div className="w-full max-w-[340px] aspect-[9/19] bg-slate-900 rounded-[45px] p-3 border-4 border-slate-800 shadow-2xl relative overflow-hidden flex flex-col ring-1 ring-slate-800/50">
@@ -62,6 +71,66 @@ export default function CitizenMobileApp({
             Level 4
           </div>
         </div>
+
+        {/* Nearby Machine Selector */}
+        <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-3 flex flex-col space-y-2 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
+          <div className="flex justify-between items-center">
+            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">SELECT RVM MACHINE</span>
+            <span className="text-[8px] font-mono text-emerald-400 animate-pulse">GPS ACTIVE</span>
+          </div>
+
+          <div className="relative">
+            <select
+              value={selectedMachine.id}
+              onChange={(e) => {
+                const found = machines.find((m) => m.id === e.target.value);
+                if (found) {
+                  setSelectedMachine(found);
+                }
+              }}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer appearance-none pr-8"
+            >
+              {machines.map((m) => (
+                <option key={m.id} value={m.id} className="bg-slate-950 text-slate-200">
+                  {m.name} ({m.distance})
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500">
+              <ChevronDown className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-1">
+            <span className="text-[8px] text-slate-500 font-semibold uppercase tracking-wider">Accepted Materials</span>
+            <div className="flex flex-wrap gap-1">
+              {selectedMachine.acceptedMaterials.map((mat) => (
+                <span
+                  key={mat}
+                  className="text-[8px] px-2 py-0.5 rounded bg-slate-950 border border-slate-800/60 text-slate-300 font-mono"
+                >
+                  {mat === 'compostable' ? 'organic' : mat === 'unsupported' ? 'metal' : mat}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Machine Warning Display */}
+        <AnimatePresence mode="wait">
+          {machineWarning && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -10, height: 0 }}
+              className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[10px] text-amber-400 font-medium leading-relaxed flex gap-2 items-start"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400 animate-pulse" />
+              <span>{machineWarning}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Dynamic QR & Scan trigger */}
         <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden">
