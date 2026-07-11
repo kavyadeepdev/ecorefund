@@ -1,0 +1,6 @@
+{
+  "name": "EcoRefund India DRS",
+  "description": "Interactive business proposal & framework for a tech-enabled Deposit Refund Scheme in India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
