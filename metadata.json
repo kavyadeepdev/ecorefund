@@ -1,6 +1,14 @@
 {
   "name": "Eco Refund",
   "description": "Interactive business proposal & framework for a tech-enabled Deposit Refund Scheme in India.",
+  "keywords": ["Eco Refund", "recycling", "deposit refund", "sustainability", "digital waste management"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

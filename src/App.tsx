@@ -1,57 +1,150 @@
 import React, { useState } from 'react';
 import { 
   Recycle, Smartphone, Coins, AlertTriangle, 
-  ArrowRight, ShieldCheck, Truck, Factory, Leaf
+  ArrowRight, ShieldCheck, Factory, Leaf
 } from 'lucide-react';
-import Calculator from './components/Calculator';
+import { motion } from 'motion/react';
+import WasteDashboard from './components/WasteDashboard';
 import DigitalTwin from './components/DigitalTwin';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Section from './components/Section';
-import MetricCard from './components/MetricCard';
+import StatCounter from './components/StatCounter';
+import PerformanceChart from './components/PerformanceChart';
+import InteractiveModel from './components/InteractiveModel';
+import BrandEprSummary from './components/BrandEprSummary.tsx';
+import type { DepositItem } from './components/digital-twin/types';
 
 export default function App() {
   const [showDigitalTwin, setShowDigitalTwin] = useState(false);
+  const [activeEconomyTab, setActiveEconomyTab] = useState<'epr' | 'material' | 'carbon'>('epr');
+  const [sharedSessionItems, setSharedSessionItems] = useState<DepositItem[]>([]);
+
+  const economyStreams = {
+    epr: {
+      title: 'EPR Subsidies',
+      percentage: '60%',
+      description: 'Funded by FMCG brands for legal compliance and verified material takeback, this is the primary structural incentive for the DRS program.',
+      detail: 'EPR revenue ensures brands pay to reclaim packaging waste with traceable, clean materials that support regulatory compliance and reduce landfill leakage.'
+    },
+    material: {
+      title: 'Material Sales',
+      percentage: '30%',
+      description: 'Revenue from selling cleaned, source-segregated recyclable materials to industrial buyers at a premium relative to mixed municipal scrap.',
+      detail: 'Because materials come in sorted and uncontaminated, the platform captures higher resale margins on PET, glass, and paper from approved recycler partners.'
+    },
+    carbon: {
+      title: 'Gov/Carbon Credit',
+      percentage: '10%',
+      description: 'Grants, carbon offsets, and public sustainability funding that reward verified collection and emissions reduction performance.',
+      detail: 'This stream adds mission-aligned funding through Swachh Bharat grants and voluntary carbon markets tied to quantifiable waste diversion and CO₂ savings.'
+    }
+  };
+
+  const activeStream = economyStreams[activeEconomyTab];
 
   if (showDigitalTwin) {
-    return <DigitalTwin onClose={() => setShowDigitalTwin(false)} />;
+    return (
+      <DigitalTwin
+        onClose={() => setShowDigitalTwin(false)}
+        initialSessionItems={sharedSessionItems}
+        onSessionItemsChange={setSharedSessionItems}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, ease: 'easeOut' }}
+      className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900 bg-slate-50"
+    >
       {/* Navigation */}
       <Navbar onLaunchDigitalTwin={() => setShowDigitalTwin(true)} />
 
-      <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32">
+      <main className="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-28">
         {/* Hero Section */}
-        <section className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-sm font-semibold uppercase tracking-wide">
-              <Leaf className="w-4 h-4" />
-              Policy Proposal
+        <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-gradient-to-br from-brand-50 via-slate-50 to-slate-100 shadow-[0_40px_120px_-60px_rgba(15,23,42,0.35)]">
+          <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.18),_transparent_57%)] pointer-events-none" />
+          <div className="absolute right-0 top-20 h-72 w-72 rounded-full bg-brand-500/10 blur-3xl" />
+          <div className="absolute left-0 top-24 h-40 w-40 rounded-full bg-slate-950/5 blur-2xl" />
+          <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] p-8 md:p-12 lg:p-16 items-center">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-brand-200 text-brand-700 text-sm font-semibold uppercase tracking-[0.24em] shadow-sm">
+                <Leaf className="w-4 h-4" />
+                Premium Recycling Platform
+              </div>
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="space-y-6">
+                <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-950 leading-tight tracking-tight">
+                  India's waste crisis is urgent. <span className="text-brand-600">Eco Refund solves it with source-segregated rewards.</span>
+                </h1>
+                <p className="text-xl text-slate-600 leading-relaxed font-medium max-w-2xl">
+                  India generates over 340,000 tonnes of municipal solid waste every day. Eco Refund cuts through the crisis by turning clean plastic and packaging deposits into instant UPI incentives, driving behavior change at the source.
+                </p>
+              </motion.div>
+              <div className="flex flex-wrap gap-4">
+                <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-2xl font-semibold flex items-center gap-2 transition-all hover:gap-3 shadow-lg shadow-brand-500/10">
+                  See the Core Mechanism <ArrowRight className="w-5 h-5" />
+                </a>
+                <button
+                  onClick={() => setShowDigitalTwin(true)}
+                  className="bg-slate-950 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-slate-900/10"
+                >
+                  Launch Digital Twin <Smartphone className="w-5 h-5 text-emerald-400 animate-pulse" />
+                </button>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 leading-tight tracking-tight">
-              A Tech-Enabled <span className="text-brand-500">Deposit Refund Scheme</span> for India
-            </h1>
-            <p className="text-xl text-slate-600 leading-relaxed font-medium max-w-lg">
-              A tech-enabled deposit refund scheme designed to incentivize proper waste disposal. Rewarding citizens with instant UPI payouts for 100% source-segregated waste.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3">
-                Explore Mechanism <ArrowRight className="w-5 h-5" />
-              </a>
-              <button 
-                onClick={() => setShowDigitalTwin(true)} 
-                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-98"
-              >
-                Launch Digital Twin <Smartphone className="w-5 h-5 text-emerald-400 animate-pulse" />
-              </button>
+
+            <div className="grid gap-6">
+              <div className="rounded-[32px] border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-xl">
+                <WasteDashboard />
+              </div>
+              <div className="rounded-[32px] border border-slate-200 bg-slate-950/95 p-6 shadow-2xl text-white">
+                <div className="mb-5">
+                  <p className="text-sm uppercase tracking-[0.24em] text-slate-400">3D Live Preview</p>
+                  <h3 className="mt-3 text-2xl font-display font-bold">Interactive eco module</h3>
+                </div>
+                <div className="grid place-items-center rounded-3xl bg-slate-900/85 p-4">
+                  <InteractiveModel />
+                </div>
+                <p className="mt-5 text-sm leading-relaxed text-slate-400">
+                  A premium animated model layered with light, orbiting rings and dynamic motion to reinforce the platform’s modern feel.
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex justify-center md:justify-end">
-            <Calculator />
           </div>
         </section>
+
+        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <StatCounter label="Monthly Users" value={12880} suffix="+" description="Active households engaging with smart recycling kiosks." />
+          <StatCounter label="Tonnes recycled" value={984} description="Verified source-segregated material returned to the circular economy." />
+          <StatCounter label="Carbon saved" value={412} suffix="t" description="Estimated CO₂ reductions from cleaner collection streams." />
+          <StatCounter label="Instant payouts" value={34200} suffix="+" description="UPI settlements delivered to citizens within seconds of each deposit." />
+        </section>
+
+        <Section id="vision" title="Performance Dashboard" icon={Coins}>
+          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] items-start">
+            <div className="space-y-6">
+              <p className="text-slate-600 max-w-2xl leading-relaxed">
+                Dynamic metrics and immersive charts make the Eco Refund experience feel premium, while reinforcing measurable impact across recycling, material quality, and citizen adoption.
+              </p>
+              <PerformanceChart />
+            </div>
+            <div className="rounded-[32px] border border-slate-200 bg-slate-950/95 p-8 shadow-2xl text-white">
+              <div className="mb-6">
+                <span className="text-sm uppercase tracking-[0.24em] text-slate-400">Rich model</span>
+                <h3 className="mt-3 text-2xl font-display font-bold">Animated 3D module</h3>
+              </div>
+              <div className="grid place-items-center rounded-3xl bg-slate-900/80 p-6 border border-slate-800">
+                <InteractiveModel />
+              </div>
+              <p className="mt-6 text-sm leading-relaxed text-slate-400">
+                The 3D preview reflects the platform’s premium visual depth and supports the rich storytelling of your digital twin ecosystem.
+              </p>
+            </div>
+          </div>
+        </Section>
 
         {/* The Mechanism */}
         <Section id="mechanism" title="The Mechanism" icon={Recycle}>
@@ -136,72 +229,108 @@ export default function App() {
 
         {/* Economic Model */}
         <Section id="economy" title="Economic Model" icon={Coins}>
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <MetricCard title="EPR Subsidies" value="60%" label="Funded by FMCG brands for legal compliance" />
-            <MetricCard title="Material Sales" value="30%" label="Revenue from selling clean scrap to recyclers" />
-            <MetricCard title="Gov/Carbon Credit" value="10%" label="Swachh Bharat grants & voluntary carbon markets" />
+          <div className="space-y-6">
+            <p className="text-slate-600 max-w-3xl leading-relaxed">
+              Cycle through the three core revenue streams to understand how the Eco Refund model blends brand compliance, material resale margins, and sustainability funding into a balanced economic strategy.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-slate-200 bg-white/90 p-2 shadow-sm">
+              {(['epr', 'material', 'carbon'] as const).map((tab) => {
+                const item = economyStreams[tab];
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveEconomyTab(tab)}
+                    className={`rounded-2xl px-5 py-3 text-sm font-semibold transition-all ${
+                      activeEconomyTab === tab
+                        ? 'bg-slate-950 text-white shadow-lg'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] items-start">
+              <div className="rounded-[32px] border border-slate-200 bg-slate-950/95 p-8 shadow-2xl text-white">
+                <span className="text-sm uppercase tracking-[0.24em] text-slate-400">Revenue contribution</span>
+                <h3 className="mt-4 text-3xl font-display font-bold text-white">{activeStream.title}</h3>
+                <p className="mt-4 text-sm leading-relaxed text-slate-300">{activeStream.description}</p>
+                <div className="mt-8 flex items-center gap-4">
+                  <div className="rounded-3xl bg-brand-50 px-6 py-5 text-center shadow-lg">
+                    <p className="text-sm uppercase tracking-[0.24em] text-brand-700">Contribution</p>
+                    <p className="mt-3 text-4xl font-display font-bold text-brand-600">{activeStream.percentage}</p>
+                  </div>
+                  <div className="rounded-3xl bg-white/10 px-6 py-5 text-slate-300 border border-white/10">
+                    <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Model focus</p>
+                    <p className="mt-3 text-base leading-relaxed">{activeStream.detail}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+                <div className="grid gap-6">
+                  <div className="rounded-3xl bg-brand-50 p-6">
+                    <p className="text-sm uppercase tracking-[0.24em] text-brand-700">Why it matters</p>
+                    <p className="mt-3 text-slate-700 leading-relaxed">
+                      {activeStream.title} drives the platform’s financial resilience and helps fund operational growth while keeping incentives aligned with sustainability goals.
+                    </p>
+                  </div>
+                  <div className="rounded-3xl bg-slate-950 p-6 text-white">
+                    <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Built for scale</p>
+                    <p className="mt-3 leading-relaxed text-slate-200">
+                      Each stream is designed to reinforce the others: brand-funded subsidies reduce user cost, material resale profits improve economics, and credits support long-term environmental credibility.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white border text-slate-700 border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
-            <div className="flex gap-4">
-               <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center shrink-0">
-                 <Coins className="w-6 h-6" />
-               </div>
-               <div>
-                 <h4 className="text-xl font-bold text-slate-900 mb-2">1. Extended Producer Responsibility (EPR)</h4>
-                 <p className="leading-relaxed">Indian law mandates brands to pull back a percentage of the plastic they put into the market. Brands will pay the DRS platform a premium to acquire verifiable "EPR Credits" because DRS provides clean, traceable source material unlike the mixed landfill dumps.</p>
-               </div>
-            </div>
-            
-             <hr className="border-slate-100" />
-            
-            <div className="flex gap-4">
-               <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center shrink-0">
-                 <Truck className="w-6 h-6" />
-               </div>
-               <div>
-                 <h4 className="text-xl font-bold text-slate-900 mb-2">2. Selling High-Quality Raw Materials</h4>
-                 <p className="leading-relaxed">Because the waste is 100% source-segregated, it doesn't need expensive multi-stage manual sorting to remove food contamination. Clean PET/Paper commands a 30-50% price premium from industrial recyclers compared to municipal solid waste.</p>
-               </div>
-            </div>
-          </div>
+          <BrandEprSummary sessionItems={sharedSessionItems} />
         </Section>
 
-        {/* Challenges & Solutions */}
-        <Section id="challenges" title="Challenges & Mitigation" icon={AlertTriangle}>
+        {/* Challenges & Mitigation */}
+        <Section id="challenges" title="Strategic Solutions" icon={ShieldCheck}>
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-rose-50 border border-rose-100 rounded-3xl p-8">
-              <h3 className="text-xl font-bold text-rose-900 mb-6 flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6" />
-                Key Sector Hurdles
-              </h3>
-              <ul className="space-y-4">
-                <li className="bg-white/60 p-4 rounded-xl border border-rose-100/50 text-rose-800 font-medium">
-                  <strong>The Unorganized Sector:</strong> Millions of informal ragpickers rely on mixed waste for livelihood. A formal DRS could displace them.
-                </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-rose-100/50 text-rose-800 font-medium">
-                  <strong>System Gamification (Fraud):</strong> Adding water/stones to paper/plastic to increase weight and extract higher payouts.
-                </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-rose-100/50 text-rose-800 font-medium">
-                  <strong>Hardware Vandalism:</strong> Unattended machines in public spaces in India are prone to damage or theft.
-                </li>
-              </ul>
-            </div>
-            
             <div className="bg-brand-50 border border-brand-100 rounded-3xl p-8">
               <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6" />
                 Strategic Mitigation
               </h3>
               <ul className="space-y-4">
-                <li className="bg-white/60 p-4 rounded-xl border border-brand-100/50 text-brand-800">
+                <li className="bg-white/80 p-4 rounded-xl border border-brand-100/70 text-brand-900 shadow-sm">
                   <strong>Include Informal Workers:</strong> Transition scrap dealers ("kabadiwalas") into certified micro-depot operators equipped with our digital scales, giving them a formal commission rather than displacing them.
                 </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-brand-100/50 text-brand-800">
+                <li className="bg-white/80 p-4 rounded-xl border border-brand-100/70 text-brand-900 shadow-sm">
                   <strong>Ai/Hardware Checks:</strong> Use moisture sensors in scales and basic ML vision to detect obvious contamination. Flag accounts that consistently deposit heavy but low-volume materials.
                 </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-brand-100/50 text-brand-800">
+                <li className="bg-white/80 p-4 rounded-xl border border-brand-100/70 text-brand-900 shadow-sm">
                   <strong>Strategic Placement:</strong> Deploy RVMs inside secure perimeters like Metro stations, gated societies, malls, and partnered Kirana (grocery) stores rather than open streets.
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+              <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-rose-500" />
+                Challenges in Context
+              </h3>
+              <p className="text-slate-600 leading-relaxed mb-6">
+                These operational challenges are the reason our solution design prioritizes local partnerships, intelligent fraud detection, and secure machine placement.
+              </p>
+              <ul className="space-y-4">
+                <li className="bg-rose-50 p-4 rounded-xl border border-rose-100 text-rose-800 font-medium">
+                  <strong>Unorganized sector risk:</strong> Millions of informal ragpickers rely on mixed waste for livelihood, so the system must preserve local value chains.
+                </li>
+                <li className="bg-rose-50 p-4 rounded-xl border border-rose-100 text-rose-800 font-medium">
+                  <strong>Fraud potential:</strong> Water, stones or contamination can be added to waste, creating the need for AI-enabled validation and smart pricing controls.
+                </li>
+                <li className="bg-rose-50 p-4 rounded-xl border border-rose-100 text-rose-800 font-medium">
+                  <strong>Vandalism threat:</strong> Unattended machines in public spaces are vulnerable, so secure deployment sites and monitoring are essential.
                 </li>
               </ul>
             </div>
@@ -210,6 +339,6 @@ export default function App() {
       </main>
 
       <Footer />
-    </div>
+    </motion.div>
   );
 }

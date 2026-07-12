@@ -8,9 +8,11 @@ import OperatorConsole from './digital-twin/OperatorConsole';
 
 interface DigitalTwinProps {
   onClose: () => void;
+  initialSessionItems?: DepositItem[];
+  onSessionItemsChange?: (items: DepositItem[]) => void;
 }
 
-export default function DigitalTwin({ onClose }: DigitalTwinProps) {
+export default function DigitalTwin({ onClose, initialSessionItems = [], onSessionItemsChange }: DigitalTwinProps) {
   // Mobile / Citizen app state
   const [sessionStep, setSessionStep] = useState<'UNAUTHENTICATED' | 'SCANNING_QR' | 'CONNECTED'>('UNAUTHENTICATED');
   const [walletBalance, setWalletBalance] = useState<number>(45.50);
@@ -78,9 +80,13 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
   };
 
   // RVM Cabinet State
-  const [currentSessionItems, setCurrentSessionItems] = useState<DepositItem[]>([]);
+  const [currentSessionItems, setCurrentSessionItems] = useState<DepositItem[]>(initialSessionItems);
   const [chuteLocked, setChuteLocked] = useState(false);
   const [payoutStatus, setPayoutStatus] = useState<'idle' | 'processing' | 'success'>('idle');
+
+  useEffect(() => {
+    onSessionItemsChange?.(currentSessionItems);
+  }, [currentSessionItems, onSessionItemsChange]);
 
   // Scanner Vision states
   const [cvScanning, setCvScanning] = useState(false);
@@ -122,6 +128,64 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
   // Helper to parse file name keyword-based heuristics
   const analyzeFileName = (filename: string): DepositItem => {
     const nameLower = filename.toLowerCase();
+
+    const brandProductPatterns = [
+      {
+        pattern: /bisleri/i,
+        name: 'Bisleri PET Bottle',
+        type: 'plastic' as const,
+        weightGrams: 25,
+        subCategory: 'PET Clear Bottle',
+        brand: 'Bisleri'
+      },
+      {
+        pattern: /coca[- ]cola|coke/i,
+        name: 'Coca-Cola PET Bottle',
+        type: 'plastic' as const,
+        weightGrams: 28,
+        subCategory: 'PET Clear Bottle',
+        brand: 'Coca-Cola'
+      },
+      {
+        pattern: /pepsi/i,
+        name: 'Pepsi PET Bottle',
+        type: 'plastic' as const,
+        weightGrams: 28,
+        subCategory: 'PET Clear Bottle',
+        brand: 'Pepsi'
+      },
+      {
+        pattern: /amul/i,
+        name: 'Amul Milk Jug',
+        type: 'plastic' as const,
+        weightGrams: 55,
+        subCategory: 'HDPE Colored Plastic',
+        brand: 'Amul'
+      },
+      {
+        pattern: /times of india|toi/i,
+        name: 'Times of India News Roll',
+        type: 'paper' as const,
+        weightGrams: 180,
+        subCategory: 'Cardboard / Mixed Paper',
+        brand: 'Times of India'
+      },
+    ];
+
+    const brandMatch = brandProductPatterns.find((pattern) => pattern.pattern.test(nameLower));
+    if (brandMatch) {
+      const rate = brandMatch.type in RATES ? RATES[brandMatch.type as keyof typeof RATES] : 0;
+      return {
+        id: Math.random().toString(),
+        name: brandMatch.name,
+        type: brandMatch.type,
+        weightGrams: brandMatch.weightGrams,
+        isContaminated: false,
+        val: parseFloat(((brandMatch.weightGrams / 100) * rate).toFixed(2)),
+        subCategory: brandMatch.subCategory,
+        brand: brandMatch.brand
+      };
+    }
 
     // Check if filename matches any preset name
     const presetMatch = MOCK_PRESETS.find(p => filename.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(filename.toLowerCase()));

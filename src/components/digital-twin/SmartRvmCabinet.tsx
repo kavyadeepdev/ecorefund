@@ -53,6 +53,17 @@ export default function SmartRvmCabinet({
   const totalSessionPayout = currentSessionItems.reduce((acc, item) => acc + item.val, 0);
   const totalSessionWeight = currentSessionItems.reduce((acc, item) => acc + item.weightGrams, 0);
 
+  const brandEprSummary = Object.entries(
+    currentSessionItems.reduce((acc, item) => {
+      const brand = item.brand || 'Generic';
+      acc[brand] = acc[brand] || { count: 0, weight: 0, value: 0 };
+      acc[brand].count += 1;
+      acc[brand].weight += item.weightGrams;
+      acc[brand].value += item.val;
+      return acc;
+    }, {} as Record<string, { count: number; weight: number; value: number }>)
+  );
+
   return (
     <div className="w-full bg-slate-900 rounded-3xl border border-slate-800 p-6 flex flex-col space-y-5 shadow-2xl relative overflow-hidden ring-1 ring-slate-800/80">
       
@@ -90,35 +101,52 @@ export default function SmartRvmCabinet({
               {payoutStatus === 'idle' ? (
                 <>
                   {currentSessionItems.length > 0 ? (
-                    <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1 py-0.5 scrollbar-thin scrollbar-thumb-slate-800">
-                      {currentSessionItems.map((item, index) => {
-                        const theme = SUBCATEGORY_THEMES[item.subCategory || ''] || {
-                          border: 'border-slate-800/50',
-                          bg: 'bg-slate-950/40',
-                          text: 'text-slate-400',
-                          dot: 'bg-slate-500'
-                        };
-                        return (
-                          <div 
-                            key={item.id || index} 
-                            className={`flex justify-between items-center px-2 py-1.5 rounded-lg border text-[10px] ${theme.border} ${theme.bg}`}
-                          >
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${theme.dot}`} />
-                              <div className="truncate">
-                                <span className="font-bold text-slate-200">{item.brand || 'Generic'}</span>
-                                <span className="text-slate-500 mx-1">•</span>
-                                <span className="text-slate-400">{item.subCategory || item.type}</span>
+                    <>
+                      <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1 py-0.5 scrollbar-thin scrollbar-thumb-slate-800">
+                        {currentSessionItems.map((item, index) => {
+                          const theme = SUBCATEGORY_THEMES[item.subCategory || ''] || {
+                            border: 'border-slate-800/50',
+                            bg: 'bg-slate-950/40',
+                            text: 'text-slate-400',
+                            dot: 'bg-slate-500'
+                          };
+                          return (
+                            <div 
+                              key={item.id || index} 
+                              className={`flex justify-between items-center px-2 py-1.5 rounded-lg border text-[10px] ${theme.border} ${theme.bg}`}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${theme.dot}`} />
+                                <div className="truncate">
+                                  <span className="font-bold text-slate-200">{item.brand || 'Generic'}</span>
+                                  <span className="text-slate-500 mx-1">•</span>
+                                  <span className="text-slate-400">{item.subCategory || item.type}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 font-mono shrink-0">
+                                <span className="text-slate-500">{item.weightGrams}g</span>
+                                <span className="text-emerald-400 font-bold">₹{item.val.toFixed(2)}</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 font-mono shrink-0">
-                              <span className="text-slate-500">{item.weightGrams}g</span>
-                              <span className="text-emerald-400 font-bold">₹{item.val.toFixed(2)}</span>
+                          );
+                        })}
+                      </div>
+
+                      {brandEprSummary.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2 mt-2 text-[10px] text-slate-300">
+                          {brandEprSummary.map(([brand, summary]) => (
+                            <div key={brand} className="rounded-xl border border-slate-800 bg-slate-950/80 p-2">
+                              <div className="font-semibold text-slate-100 truncate">{brand}</div>
+                              <div className="mt-1 flex items-center justify-between gap-2 text-slate-400">
+                                <span>{summary.count} item{summary.count > 1 ? 's' : ''}</span>
+                                <span>₹{summary.value.toFixed(2)}</span>
+                              </div>
+                              <div className="mt-1 text-slate-500">{summary.weight}g</div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <p className="text-slate-500 text-[10px] leading-relaxed italic py-1">
                       No items in chute. Use preset samples below or upload an image to simulate optical CV camera scanning.
