@@ -61,7 +61,7 @@ export default function App() {
               <ShieldCheck className="w-10 h-10 text-brand-500 mb-6 relative z-10" />
               <h3 className="text-xl font-bold mb-3 relative z-10">Source Segregation</h3>
               <p className="text-slate-600 leading-relaxed relative z-10">
-                Citizens strictly segregate waste at home into specific categories (Plastic, Paper, Glass, Compostable). Unsegregated waste is outright rejected by the system.
+                Citizens now segregate waste at home by brand and material (Plastic, Paper, Glass, Compostable), with brand-specific segregation right at the source. Unsegregated waste is outright rejected by the system.
               </p>
             </div>
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
@@ -69,7 +69,7 @@ export default function App() {
               <Factory className="w-10 h-10 text-brand-500 mb-6 relative z-10" />
               <h3 className="text-xl font-bold mb-3 relative z-10">RVM & Depot Drop-off</h3>
               <p className="text-slate-600 leading-relaxed relative z-10">
-                Users deposit waste at automated Reverse Vending Machines (RVMs) for standard items (bottles/cans) or local AI-weighing depots for bulk separated waste.
+                Users deposit waste at automated Reverse Vending Machines (RVMs) for standard items (bottles/cans) or local AI-weighing depots for bulk separated waste. At drop-off and sorting, segregated waste is routed back to the original product manufacturers to support Extended Producer Responsibility (EPR) compliance, while all other collected non-brand-specific materials are sold to recyclers or safely disposed of.
               </p>
             </div>
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">

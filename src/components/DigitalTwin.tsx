@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Recycle, Smartphone, Terminal } from 'lucide-react';
 import OpenAI from 'openai';
-import { DepositItem, RATES, MOCK_PRESETS } from './digital-twin/types';
+import { DepositItem, RATES, MOCK_PRESETS, RvmMachine, MOCK_RVM_MACHINES } from './digital-twin/types';
 import CitizenMobileApp from './digital-twin/CitizenMobileApp';
 import SmartRvmCabinet from './digital-twin/SmartRvmCabinet';
 import OperatorConsole from './digital-twin/OperatorConsole';
@@ -11,68 +11,107 @@ interface DigitalTwinProps {
 }
 
 export default function DigitalTwin({ onClose }: DigitalTwinProps) {
+  // Mobile / Citizen app state
   const [sessionStep, setSessionStep] = useState<'UNAUTHENTICATED' | 'SCANNING_QR' | 'CONNECTED'>('UNAUTHENTICATED');
-
-  // App Wallet Balance
-  const [walletBalance, setWalletBalance] = useState(150.00);
-  const [carbonSaved, setCarbonSaved] = useState(8.5);
-  const [userQrToken, setUserQrToken] = useState('ECO-8472-UPI');
-  const [qrTimer, setQrTimer] = useState(15);
+  const [walletBalance, setWalletBalance] = useState<number>(45.50);
+  const [carbonSaved, setCarbonSaved] = useState<number>(2.435); // kg CO2
+  const [userQrToken, setUserQrToken] = useState<string>('');
+  const [qrTimer, setQrTimer] = useState<number>(0);
   const [transactions, setTransactions] = useState([
-    { id: 'tx-001', date: '2026-05-26', amount: 8.50, items: 3, status: 'Success' },
+    { id: 'tx-001', date: '2026-06-02', amount: 8.50, items: 3, status: 'Success' },
     { id: 'tx-002', date: '2026-05-25', amount: 14.00, items: 5, status: 'Success' },
   ]);
+
+  // Machine Selection States
+  const [selectedMachine, setSelectedMachine] = useState<RvmMachine>(MOCK_RVM_MACHINES[0]);
+  const [machineWarning, setMachineWarning] = useState<string | null>(null);
+
+  const handleMachineChange = (newMachine: RvmMachine) => {
+    setSelectedMachine(newMachine);
+    addLog(`RVM Connection: Switched station to ${newMachine.name}.`, 'info');
+
+    if (currentSessionItems.length > 0) {
+      // Find incompatible items
+      const incompatible = currentSessionItems.filter((item) => {
+        const isSupported = item.type === 'sand'
+          ? newMachine.acceptedMaterials.includes('plastic')
+          : newMachine.acceptedMaterials.includes(item.type as any);
+        return !isSupported;
+      });
+
+      if (incompatible.length > 0) {
+        const compatibleItems = currentSessionItems.filter((item) => {
+          const isSupported = item.type === 'sand'
+            ? newMachine.acceptedMaterials.includes('plastic')
+            : newMachine.acceptedMaterials.includes(item.type as any);
+          return isSupported;
+        });
+
+        setCurrentSessionItems(compatibleItems);
+
+        const names = incompatible.map((item) => item.name).join(', ');
+        const warnMsg = `Cleared ${incompatible.length} incompatible item(s) (${names}) because ${newMachine.name} does not accept those materials.`;
+        setMachineWarning(warnMsg);
+        addLog(`Safety alert: ${warnMsg}`, 'warn');
+
+        // Clear warning after 6 seconds
+        setTimeout(() => {
+          setMachineWarning(null);
+        }, 6000);
+      } else {
+        setMachineWarning(null);
+      }
+    } else {
+      setMachineWarning(null);
+    }
+
+    // Reset currently scanned/ingested item if unsupported on new machine
+    if (cvResult) {
+      const isSupported = cvResult.type === 'sand'
+        ? newMachine.acceptedMaterials.includes('plastic')
+        : newMachine.acceptedMaterials.includes(cvResult.type as any);
+      if (!isSupported) {
+        handleResetSlot();
+        addLog(`Reset scanner slot: current item is unsupported on the new station.`, 'warn');
+      }
+    }
+  };
 
   // RVM Cabinet State
   const [currentSessionItems, setCurrentSessionItems] = useState<DepositItem[]>([]);
   const [chuteLocked, setChuteLocked] = useState(false);
-  const [binFullness, setBinFullness] = useState(42);
   const [payoutStatus, setPayoutStatus] = useState<'idle' | 'processing' | 'success'>('idle');
-  const [fallbackCalibrationOpen, setFallbackCalibrationOpen] = useState(false);
 
-  // Current Analyzed Item states
+  // Scanner Vision states
+  const [cvScanning, setCvScanning] = useState(false);
   const [uploadedImageSrc, setUploadedImageSrc] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [uploadedFileType, setUploadedFileType] = useState<string>('');
-  const [cvScanning, setCvScanning] = useState(false);
   const [cvResult, setCvResult] = useState<DepositItem | null>(null);
-  const [cvRejected, setCvRejected] = useState<boolean>(false);
+  const [cvRejected, setCvRejected] = useState(false);
   const [cvMessage, setCvMessage] = useState<string>('');
+  const [fallbackCalibrationOpen, setFallbackCalibrationOpen] = useState(false);
 
-  // Logs list
-  const [logs, setLogs] = useState<{ id: string; time: string; msg: string; type: 'info' | 'warn' | 'success' | 'mqtt' }[]>([
-    { id: '1', time: '13:05:00', msg: 'DRS AI-Classifier Node v2.5 initialized.', type: 'info' },
-    { id: '2', time: '13:05:01', msg: '[MQTT] Subscribed to topic: rvm/001/telemetry', type: 'mqtt' },
-    { id: '3', time: '13:05:02', msg: 'Chute door status: LOCKED (Awaiting user scan)', type: 'info' }
+  // IoT / operator console logs
+  const [binFullness, setBinFullness] = useState<number>(38); // % compacted fullness
+  const [logs, setLogs] = useState<Array<{ id: string; time: string; msg: string; type: 'info' | 'warn' | 'success' | 'mqtt' }>>([
+    { id: '1', time: '13:00:15', msg: 'Core container initialization complete.', type: 'info' },
+    { id: '2', time: '13:00:16', msg: '[MQTT] connected to broker.hivemq.com:1883', type: 'mqtt' },
+    { id: '3', time: '13:00:18', msg: 'Compact Chamber solenoid system calibrated.', type: 'info' },
+    { id: '4', time: '13:02:40', msg: 'LIDAR fill-level sensor readings calibrated. Bin fullness: 38%.', type: 'info' },
   ]);
 
-  // QR Code generator loop
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setQrTimer((prev) => {
-        if (prev <= 1) {
-          const rand = Math.floor(1000 + Math.random() * 9000);
-          setUserQrToken(`ECO-${rand}-UPI`);
-          return 15;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const addLog = (msg: string, type: 'info' | 'warn' | 'success' | 'mqtt' = 'info') => {
-    const now = new Date();
-    const timeStr = now.toTimeString().split(' ')[0];
+    const timeStr = new Date().toTimeString().split(' ')[0];
     setLogs((prev) => [...prev, { id: Math.random().toString(), time: timeStr, msg, type }]);
   };
 
-  // Phone App Scan Click
+  // Auth scan simulator trigger from Mobile application
   const handleInitiateScan = () => {
-    if (sessionStep !== 'UNAUTHENTICATED') return;
     setSessionStep('SCANNING_QR');
-    addLog('RVM Optical Scanner: Laser alignment triggered.', 'info');
+    addLog('Operator Terminal: scanning active Citizen QR session...', 'info');
 
+    // Simulate standard optical connection delay
     setTimeout(() => {
       setSessionStep('CONNECTED');
       addLog(`[MQTT] authenticated: rvm/001/session {"user": "Aarav Sharma", "token": "${userQrToken}"}`, 'mqtt');
@@ -84,6 +123,24 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
   const analyzeFileName = (filename: string): DepositItem => {
     const nameLower = filename.toLowerCase();
 
+    // Check if filename matches any preset name
+    const presetMatch = MOCK_PRESETS.find(p => filename.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(filename.toLowerCase()));
+    if (presetMatch) {
+      const rate = presetMatch.type in RATES ? RATES[presetMatch.type as keyof typeof RATES] : 0;
+      const val = presetMatch.isContaminated ? 0 : parseFloat(((presetMatch.weightGrams / 100) * rate).toFixed(2));
+      return {
+        id: Math.random().toString(),
+        name: presetMatch.name,
+        type: presetMatch.type,
+        weightGrams: presetMatch.weightGrams,
+        isContaminated: presetMatch.isContaminated,
+        rejectReason: 'rejectReason' in presetMatch ? presetMatch.rejectReason : undefined,
+        val,
+        subCategory: presetMatch.subCategory,
+        brand: presetMatch.brand
+      };
+    }
+
     if (nameLower.includes('sand') || nameLower.includes('rock') || nameLower.includes('stone') || nameLower.includes('weight')) {
       return {
         id: Math.random().toString(),
@@ -92,7 +149,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
         weightGrams: 480,
         isContaminated: true,
         rejectReason: 'Weight mismatch: expected 20g-40g, scaled 480g. Sand or liquid content suspected.',
-        val: 0
+        val: 0,
+        subCategory: 'PET Clear Bottle',
+        brand: 'Contaminated'
       };
     }
     if (nameLower.includes('can') || nameLower.includes('tin') || nameLower.includes('metal') || nameLower.includes('aluminum') || nameLower.includes('coke')) {
@@ -103,7 +162,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
         weightGrams: 15,
         isContaminated: false,
         rejectReason: 'Metal can detected. This kiosk only recycles Plastics, Paper, Glass, and Biodegradable waste.',
-        val: 0
+        val: 0,
+        subCategory: 'Unsupported Metal Cans',
+        brand: 'Generic Metal'
       };
     }
     if (nameLower.includes('bottle') || nameLower.includes('plastic') || nameLower.includes('pet') || nameLower.includes('water')) {
@@ -115,7 +176,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
         type: 'plastic',
         weightGrams: w,
         isContaminated: false,
-        val: parseFloat(((w / 100) * rate).toFixed(2))
+        val: parseFloat(((w / 100) * rate).toFixed(2)),
+        subCategory: 'PET Clear Bottle',
+        brand: 'Generic Plastic'
       };
     }
     if (nameLower.includes('glass') || nameLower.includes('beer') || nameLower.includes('wine')) {
@@ -127,7 +190,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
         type: 'glass',
         weightGrams: w,
         isContaminated: false,
-        val: parseFloat(((w / 100) * rate).toFixed(2))
+        val: parseFloat(((w / 100) * rate).toFixed(2)),
+        subCategory: 'Glass Clear Bottle',
+        brand: 'Generic Glass'
       };
     }
     if (nameLower.includes('paper') || nameLower.includes('news') || nameLower.includes('cardboard') || nameLower.includes('book')) {
@@ -139,7 +204,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
         type: 'paper',
         weightGrams: w,
         isContaminated: false,
-        val: parseFloat(((w / 100) * rate).toFixed(2))
+        val: parseFloat(((w / 100) * rate).toFixed(2)),
+        subCategory: 'Cardboard / Mixed Paper',
+        brand: 'Generic Paper'
       };
     }
     if (nameLower.includes('banana') || nameLower.includes('peel') || nameLower.includes('apple') || nameLower.includes('food') || nameLower.includes('waste') || nameLower.includes('organic')) {
@@ -151,7 +218,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
         type: 'compostable',
         weightGrams: w,
         isContaminated: false,
-        val: parseFloat(((w / 100) * rate).toFixed(2))
+        val: parseFloat(((w / 100) * rate).toFixed(2)),
+        subCategory: 'Organic Compostable',
+        brand: 'Organic'
       };
     }
 
@@ -196,7 +265,9 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
 
         const systemPrompt = `You are the Computer Vision system inside an automated Reverse Vending Machine (RVM) and depot scale in India.
 Analyze the provided image of waste.
-Identify the material class. The allowed classes are:
+Classify the item into broad material classes and specific product-wise segregation sub-categories.
+
+The broad classes are:
 - "plastic" (PET bottles, beverage containers, plastic packaging)
 - "glass" (bottles, jars)
 - "paper" (newspapers, cardboard, flyers)
@@ -204,21 +275,34 @@ Identify the material class. The allowed classes are:
 - "unsupported" (metal cans, electronic waste, toxic items)
 - "unknown" (unrecognized waste or random non-waste objects)
 
+You MUST also determine the exact product-wise subCategory and brand:
+- subCategory MUST be one of these:
+  1. "PET Clear Bottle" (For transparent plastic beverage bottles)
+  2. "HDPE Colored Plastic" (For colored or opaque jugs/plastic containers)
+  3. "Glass Clear Bottle" (For glass soda/beer/wine/jars)
+  4. "Cardboard / Mixed Paper" (For newspapers, boxes, rolls, mixed papers)
+  5. "Organic Compostable" (For fruit peels, food leftovers)
+  6. "Unsupported Metal Cans" (For metal/aluminum beverage cans)
+- brand: Identify the brand name visible on the product label (e.g. "Bisleri", "Coca-Cola", "Amul", "Times of India", "Pepsi") or return "Generic" if none is identifiable.
+
 Check for contamination or fraud:
 - "isContaminated": true if the item contains non-waste fillers (like sand/water in a plastic bottle to inflate weight), contains high levels of food residue (>10%), or is a dangerous mixture.
 - "rejectReason": Provide a human-readable reason if the item is contaminated, unsupported, or unknown. Otherwise leave it empty.
 
 Provide an estimated weight in grams:
-- Plastic bottles: typically 20g - 40g
-- Glass bottles: typically 200g - 500g
-- Paper / Newspapers: typically 100g - 300g
-- Compostable / Banana peels: typically 50g - 150g
+- PET Clear Bottles: typically 20g - 40g
+- HDPE Colored Plastics: typically 40g - 80g
+- Glass Bottles: typically 200g - 500g
+- Cardboard/Paper: typically 100g - 300g
+- Compostable/Organic: typically 50g - 150g
 - Metal cans: typically 15g - 25g
 
 Format your output strictly as a JSON object with the following fields:
 {
-  "name": "Short descriptive name of the item (e.g. Clean Plastic Water Bottle)",
+  "name": "Full descriptive name of the item (e.g. Bisleri PET Clear Bottle)",
   "type": "plastic" | "glass" | "paper" | "compostable" | "unsupported" | "unknown",
+  "subCategory": "PET Clear Bottle" | "HDPE Colored Plastic" | "Glass Clear Bottle" | "Cardboard / Mixed Paper" | "Organic Compostable" | "Unsupported Metal Cans",
+  "brand": "string (brand name or 'Generic')",
   "weightGrams": number,
   "isContaminated": boolean,
   "rejectReason": "string (only if rejected)"
@@ -273,7 +357,9 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
           weightGrams: parsed.weightGrams || 0,
           isContaminated: !!parsed.isContaminated,
           rejectReason: parsed.rejectReason || undefined,
-          val: parsed.isContaminated ? 0 : val
+          val: parsed.isContaminated ? 0 : val,
+          subCategory: parsed.subCategory || undefined,
+          brand: parsed.brand || undefined
         };
 
         setCvScanning(false);
@@ -317,6 +403,26 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
   };
 
   const processDetectionResult = (item: DepositItem) => {
+    const isSupported = item.type === 'sand'
+      ? selectedMachine.acceptedMaterials.includes('plastic')
+      : selectedMachine.acceptedMaterials.includes(item.type as any);
+
+    if (!isSupported) {
+      const rejectReason = `${selectedMachine.name} does not accept ${item.type === 'sand' ? 'plastic' : item.type} materials. Please select a compatible station or item.`;
+      const detectedItem: DepositItem = {
+        ...item,
+        isContaminated: true,
+        rejectReason,
+        val: 0
+      };
+      setCvRejected(true);
+      setCvResult(detectedItem);
+      setCvMessage(`REJECTED: ${rejectReason}`);
+      addLog(`Validation error: ${rejectReason}`, 'warn');
+      addLog(`[MQTT] post: rvm/001/reject {"filename": "${item.name}", "reason": "Station Incompatibility"}`, 'mqtt');
+      return;
+    }
+
     if (item.isContaminated || item.type === 'unsupported') {
       setCvRejected(true);
       setCvResult(item);
@@ -350,6 +456,8 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
       isContaminated: preset.isContaminated,
       rejectReason: 'rejectReason' in preset ? preset.rejectReason : undefined,
       val: parseFloat(val.toFixed(2)),
+      subCategory: preset.subCategory,
+      brand: preset.brand
     };
 
     setUploadedImageSrc(preset.type);
@@ -397,14 +505,30 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
     let weight = 30;
     let isContaminated = false;
     let rejectReason = undefined;
+    let subCategory = undefined;
+    let brand = 'Generic';
 
-    if (type === 'glass') weight = 350;
-    if (type === 'paper') weight = 120;
-    if (type === 'compostable') weight = 80;
+    if (type === 'plastic') {
+      weight = 25;
+      subCategory = 'PET Clear Bottle';
+    }
+    if (type === 'glass') {
+      weight = 350;
+      subCategory = 'Glass Clear Bottle';
+    }
+    if (type === 'paper') {
+      weight = 120;
+      subCategory = 'Cardboard / Mixed Paper';
+    }
+    if (type === 'compostable') {
+      weight = 80;
+      subCategory = 'Organic Compostable';
+    }
     if (type === 'unsupported') {
       weight = 20;
       isContaminated = true;
       rejectReason = 'Unrecognized hardware signature. Placed in trash bin instead.';
+      subCategory = 'Unsupported Metal Cans';
     }
 
     const rate = type in RATES ? RATES[type as keyof typeof RATES] : 0;
@@ -417,7 +541,9 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
       weightGrams: weight,
       isContaminated,
       rejectReason,
-      val
+      val,
+      subCategory,
+      brand
     };
 
     processDetectionResult(item);
@@ -517,6 +643,10 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             qrTimer={qrTimer}
             transactions={transactions}
             handleInitiateScan={handleInitiateScan}
+            selectedMachine={selectedMachine}
+            setSelectedMachine={handleMachineChange}
+            machines={MOCK_RVM_MACHINES}
+            machineWarning={machineWarning}
           />
         </div>
 
@@ -539,6 +669,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             cvMessage={cvMessage}
             fallbackCalibrationOpen={fallbackCalibrationOpen}
             chuteLocked={chuteLocked}
+            selectedMachine={selectedMachine}
             handleFileUpload={handleFileUpload}
             handleSelectPreset={handleSelectPreset}
             handleConfirmItem={handleConfirmItem}

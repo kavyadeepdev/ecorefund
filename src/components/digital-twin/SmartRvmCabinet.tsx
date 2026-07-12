@@ -4,7 +4,7 @@ import {
   ShieldCheck, AlertTriangle, Check, Send 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DepositItem, MOCK_PRESETS } from './types';
+import { DepositItem, MOCK_PRESETS, RvmMachine, SUBCATEGORY_THEMES } from './types';
 import ItemSVG from './ItemSVG';
 
 interface SmartRvmCabinetProps {
@@ -19,6 +19,7 @@ interface SmartRvmCabinetProps {
   cvMessage: string;
   fallbackCalibrationOpen: boolean;
   chuteLocked: boolean;
+  selectedMachine: RvmMachine;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectPreset: (preset: typeof MOCK_PRESETS[number]) => void;
   handleConfirmItem: () => void;
@@ -39,6 +40,7 @@ export default function SmartRvmCabinet({
   cvMessage,
   fallbackCalibrationOpen,
   chuteLocked,
+  selectedMachine,
   handleFileUpload,
   handleSelectPreset,
   handleConfirmItem,
@@ -77,26 +79,67 @@ export default function SmartRvmCabinet({
           )}
 
           {sessionStep === 'CONNECTED' && (
-            <div className="w-full text-left text-xs space-y-1">
-              <div className="flex justify-between border-b border-slate-900 pb-1 mb-1">
-                <span className="text-emerald-400 font-bold">CHUTE ACCESS GRANTED</span>
-                <span className="text-slate-400 font-semibold">{currentSessionItems.length} Verified</span>
+            <div className="w-full text-left text-xs space-y-2">
+              <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> CHUTE ACCESS OPEN
+                </span>
+                <span className="text-slate-400 font-semibold">{currentSessionItems.length} Verified Item(s)</span>
               </div>
+              
               {payoutStatus === 'idle' ? (
                 <>
-                  <p className="text-slate-400">Scan waste item using upload or presets below.</p>
-                  <div className="flex justify-between font-bold text-sm text-white pt-1">
-                    <span>Session Payout:</span>
-                    <span className="text-emerald-400 font-mono">₹{totalSessionPayout.toFixed(2)}</span>
+                  {currentSessionItems.length > 0 ? (
+                    <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1 py-0.5 scrollbar-thin scrollbar-thumb-slate-800">
+                      {currentSessionItems.map((item, index) => {
+                        const theme = SUBCATEGORY_THEMES[item.subCategory || ''] || {
+                          border: 'border-slate-800/50',
+                          bg: 'bg-slate-950/40',
+                          text: 'text-slate-400',
+                          dot: 'bg-slate-500'
+                        };
+                        return (
+                          <div 
+                            key={item.id || index} 
+                            className={`flex justify-between items-center px-2 py-1.5 rounded-lg border text-[10px] ${theme.border} ${theme.bg}`}
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${theme.dot}`} />
+                              <div className="truncate">
+                                <span className="font-bold text-slate-200">{item.brand || 'Generic'}</span>
+                                <span className="text-slate-500 mx-1">•</span>
+                                <span className="text-slate-400">{item.subCategory || item.type}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 font-mono shrink-0">
+                              <span className="text-slate-500">{item.weightGrams}g</span>
+                              <span className="text-emerald-400 font-bold">₹{item.val.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-[10px] leading-relaxed italic py-1">
+                      No items in chute. Use preset samples below or upload an image to simulate optical CV camera scanning.
+                    </p>
+                  )}
+                  
+                  <div className="flex justify-between font-bold text-xs text-white pt-1.5 border-t border-slate-900">
+                    <span className="text-slate-400 uppercase tracking-wider text-[9px] self-center">Est. Refund</span>
+                    <div className="flex items-baseline gap-1.5 font-mono">
+                      <span className="text-[10px] text-slate-500 font-normal">({totalSessionWeight}g)</span>
+                      <span className="text-sm text-emerald-400">₹{totalSessionPayout.toFixed(2)}</span>
+                    </div>
                   </div>
                 </>
               ) : payoutStatus === 'processing' ? (
-                <div className="flex items-center justify-center gap-2 py-2">
+                <div className="flex items-center justify-center gap-2 py-3">
                   <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" />
                   <span className="text-emerald-400 font-bold">UPI ROUTING IN PROGRESS...</span>
                 </div>
               ) : (
-                <div className="flex items-center justify-center gap-2 py-2 text-emerald-400 font-bold">
+                <div className="flex items-center justify-center gap-2 py-3 text-emerald-400 font-bold">
                   <Check className="w-5 h-5" />
                   <span>PAYOUT SUCCESSFUL!</span>
                 </div>
@@ -140,10 +183,20 @@ export default function SmartRvmCabinet({
             <div className="w-full h-full relative flex items-center justify-center p-2 z-10">
               {/* Bounding box outline */}
               {cvResult && !cvScanning && (
-                <div className={`absolute inset-4 border-2 rounded-xl z-20 pointer-events-none ${cvRejected ? 'border-rose-500 animate-pulse' : 'border-emerald-500'}`}>
-                  <span className={`absolute top-2 left-2 text-[9px] font-mono font-bold px-2 py-0.5 rounded text-white ${cvRejected ? 'bg-rose-500' : 'bg-emerald-500'}`}>
-                    {cvRejected ? 'REJECTED' : 'ACCEPTED'} • {cvResult.type.toUpperCase()} ({cvResult.weightGrams}g)
-                  </span>
+                <div className={`absolute inset-4 border-2 rounded-xl z-20 pointer-events-none ${cvRejected ? 'border-rose-500 animate-pulse' : 'border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.15)]'}`}>
+                  <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                    <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded text-white shadow-sm ${cvRejected ? 'bg-rose-500' : 'bg-emerald-500'}`}>
+                      {cvRejected ? 'REJECTED' : 'ACCEPTED'} • {cvResult.type.toUpperCase()}
+                    </span>
+                    {cvResult.subCategory && (
+                      <span className="bg-slate-950/95 text-[8px] border border-slate-800 text-slate-300 font-mono px-1.5 py-0.5 rounded shadow-sm">
+                        {cvResult.brand ? `${cvResult.brand} • ` : ''}{cvResult.subCategory}
+                      </span>
+                    )}
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-slate-950/95 text-[8px] border border-slate-800 text-slate-400 font-mono px-1.5 py-0.5 rounded">
+                    Estimated Weight: {cvResult.weightGrams}g
+                  </div>
                 </div>
               )}
               
@@ -283,24 +336,62 @@ export default function SmartRvmCabinet({
           <span className="text-[10px] text-slate-500 font-mono">Simulates camera ingestion</span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {MOCK_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              disabled={sessionStep !== 'CONNECTED' || cvScanning}
-              onClick={() => handleSelectPreset(preset)}
-              className={`text-left p-2.5 rounded-xl border transition-all flex flex-col text-xs relative ${
-                sessionStep !== 'CONNECTED' 
-                  ? 'opacity-40 cursor-not-allowed border-slate-800 bg-slate-900/10 text-slate-600'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 text-slate-300 cursor-pointer'
-              }`}
-            >
-              {preset.isContaminated && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              )}
-              <span className="font-semibold block truncate w-[90%]">{preset.name}</span>
-              <span className="text-[9px] text-slate-500 font-mono mt-0.5">{preset.weightGrams}g • {preset.type}</span>
-            </button>
-          ))}
+          {MOCK_PRESETS.map((preset) => {
+            const isSupported = preset.type === 'sand'
+              ? selectedMachine.acceptedMaterials.includes('plastic')
+              : selectedMachine.acceptedMaterials.includes(preset.type as any);
+
+            const isDisabled = sessionStep !== 'CONNECTED' || cvScanning || !isSupported;
+            const theme = SUBCATEGORY_THEMES[preset.subCategory] || {
+              border: 'border-slate-800',
+              bg: 'bg-slate-900/40',
+              text: 'text-slate-400',
+              dot: 'bg-slate-500'
+            };
+
+            return (
+              <button
+                key={preset.id}
+                disabled={isDisabled}
+                onClick={() => handleSelectPreset(preset)}
+                className={`text-left p-2.5 rounded-xl border transition-all flex flex-col text-xs relative overflow-hidden ${
+                  sessionStep !== 'CONNECTED' 
+                    ? 'opacity-40 cursor-not-allowed border-slate-800 bg-slate-900/10 text-slate-600'
+                    : !isSupported
+                      ? 'opacity-25 cursor-not-allowed border-rose-950/40 bg-rose-950/5 text-rose-400/60'
+                      : `bg-slate-900/40 hover:bg-slate-850 cursor-pointer ${theme.border} hover:border-emerald-500/50`
+                }`}
+              >
+                {/* Background glow aligned with subcategory color */}
+                {isSupported && sessionStep === 'CONNECTED' && (
+                  <div className={`absolute top-0 right-0 w-16 h-16 rounded-full -mr-6 -mt-6 blur-md opacity-15 pointer-events-none ${theme.dot}`} />
+                )}
+
+                <div className="flex justify-between items-start w-full gap-1">
+                  <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider font-mono ${theme.bg} ${theme.text}`}>
+                    {preset.brand}
+                  </span>
+                  
+                  {preset.isContaminated && isSupported && (
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse mt-1" />
+                  )}
+                  
+                  {!isSupported && sessionStep === 'CONNECTED' && (
+                    <span className="px-1 rounded bg-rose-500/20 text-[7px] font-bold text-rose-400 font-mono tracking-wide">
+                      UNSUPPORTED
+                    </span>
+                  )}
+                </div>
+
+                <span className="font-bold text-slate-200 mt-2 block truncate w-full">{preset.name}</span>
+                
+                <div className="flex justify-between items-center w-full mt-1 border-t border-slate-900 pt-1 text-[9px] text-slate-500 font-mono">
+                  <span>{preset.subCategory}</span>
+                  <span className="font-semibold text-slate-400">{preset.weightGrams}g</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
