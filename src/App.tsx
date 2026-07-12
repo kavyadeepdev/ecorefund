@@ -3,7 +3,6 @@ import {
   Recycle, Smartphone, Coins, AlertTriangle, 
   ArrowRight, ShieldCheck, Truck, Factory, Leaf
 } from 'lucide-react';
-import Calculator from './components/Calculator';
 import DigitalTwin from './components/DigitalTwin';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -18,13 +17,13 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900">
+    <div id="top" className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900">
       {/* Navigation */}
       <Navbar onLaunchDigitalTwin={() => setShowDigitalTwin(true)} />
 
       <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32">
         {/* Hero Section */}
-        <section className="grid md:grid-cols-2 gap-12 items-center">
+        <section id="vision" className="space-y-8 max-w-3xl mx-auto text-center">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-sm font-semibold uppercase tracking-wide">
               <Leaf className="w-4 h-4" />
@@ -33,10 +32,10 @@ export default function App() {
             <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 leading-tight tracking-tight">
               A Tech-Enabled <span className="text-brand-500">Deposit Refund Scheme</span> for India
             </h1>
-            <p className="text-xl text-slate-600 leading-relaxed font-medium max-w-lg">
+            <p className="text-xl text-slate-600 leading-relaxed font-medium mx-auto">
               A tech-enabled deposit refund scheme designed to incentivize proper waste disposal. Rewarding citizens with instant UPI payouts for 100% source-segregated waste.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 justify-center">
               <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3">
                 Explore Mechanism <ArrowRight className="w-5 h-5" />
               </a>
@@ -47,9 +46,6 @@ export default function App() {
                 Launch Digital Twin <Smartphone className="w-5 h-5 text-emerald-400 animate-pulse" />
               </button>
             </div>
-          </div>
-          <div className="flex justify-center md:justify-end">
-            <Calculator />
           </div>
         </section>
 
@@ -168,42 +164,45 @@ export default function App() {
         </Section>
 
         {/* Challenges & Solutions */}
-        <Section id="challenges" title="Challenges & Mitigation" icon={AlertTriangle}>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-rose-50 border border-rose-100 rounded-3xl p-8">
-              <h3 className="text-xl font-bold text-rose-900 mb-6 flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6" />
-                Key Sector Hurdles
+        <Section id="challenges" title="Strategic Solutions" icon={ShieldCheck}>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-brand-50 border border-brand-100 rounded-3xl p-8">
+              <h3 className="text-xl font-bold text-brand-900 mb-3 flex items-center gap-2">
+                <ShieldCheck className="w-6 h-6" />
+                Include Informal Workers
               </h3>
-              <ul className="space-y-4">
-                <li className="bg-white/60 p-4 rounded-xl border border-rose-100/50 text-rose-800 font-medium">
-                  <strong>The Unorganized Sector:</strong> Millions of informal ragpickers rely on mixed waste for livelihood. A formal DRS could displace them.
-                </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-rose-100/50 text-rose-800 font-medium">
-                  <strong>System Gamification (Fraud):</strong> Adding water/stones to paper/plastic to increase weight and extract higher payouts.
-                </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-rose-100/50 text-rose-800 font-medium">
-                  <strong>Hardware Vandalism:</strong> Unattended machines in public spaces in India are prone to damage or theft.
-                </li>
-              </ul>
+              <p className="text-brand-800 mb-4 leading-relaxed">
+                Transition scrap dealers ("kabadiwalas") into certified micro-depot operators equipped with our digital scales, giving them a formal commission rather than displacing them.
+              </p>
+              <p className="text-sm text-brand-700 italic">
+                Addresses: Millions of informal ragpickers and waste workers who depend on mixed waste for livelihood
+              </p>
             </div>
             
             <div className="bg-brand-50 border border-brand-100 rounded-3xl p-8">
-              <h3 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
+              <h3 className="text-xl font-bold text-brand-900 mb-3 flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6" />
-                Strategic Mitigation
+                Fraud Prevention Systems
               </h3>
-              <ul className="space-y-4">
-                <li className="bg-white/60 p-4 rounded-xl border border-brand-100/50 text-brand-800">
-                  <strong>Include Informal Workers:</strong> Transition scrap dealers ("kabadiwalas") into certified micro-depot operators equipped with our digital scales, giving them a formal commission rather than displacing them.
-                </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-brand-100/50 text-brand-800">
-                  <strong>Ai/Hardware Checks:</strong> Use moisture sensors in scales and basic ML vision to detect obvious contamination. Flag accounts that consistently deposit heavy but low-volume materials.
-                </li>
-                <li className="bg-white/60 p-4 rounded-xl border border-brand-100/50 text-brand-800">
-                  <strong>Strategic Placement:</strong> Deploy RVMs inside secure perimeters like Metro stations, gated societies, malls, and partnered Kirana (grocery) stores rather than open streets.
-                </li>
-              </ul>
+              <p className="text-brand-800 mb-4 leading-relaxed">
+                Use moisture sensors in scales and basic ML vision to detect obvious contamination. Flag accounts that consistently deposit heavy but low-volume materials to prevent gaming the system.
+              </p>
+              <p className="text-sm text-brand-700 italic">
+                Addresses: Risk of adding water/stones to waste to artificially inflate weight and extract higher payouts
+              </p>
+            </div>
+
+            <div className="bg-brand-50 border border-brand-100 rounded-3xl p-8">
+              <h3 className="text-xl font-bold text-brand-900 mb-3 flex items-center gap-2">
+                <ShieldCheck className="w-6 h-6" />
+                Secure Strategic Placement
+              </h3>
+              <p className="text-brand-800 mb-4 leading-relaxed">
+                Deploy RVMs inside secure perimeters like Metro stations, gated societies, malls, and partnered Kirana (grocery) stores rather than open streets for protection and accessibility.
+              </p>
+              <p className="text-sm text-brand-700 italic">
+                Addresses: Hardware vandalism and theft risk in public spaces across India
+              </p>
             </div>
           </div>
         </Section>

@@ -3,7 +3,7 @@ import { Recycle, Github } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-400 py-16 border-t border-slate-900">
+    <footer id="contact" className="bg-slate-950 text-slate-400 py-16 border-t border-slate-900">
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Column 1: Brand Info */}
         <div className="space-y-4">
