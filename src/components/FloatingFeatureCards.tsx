@@ -17,7 +17,7 @@ const featureCards: FeatureCard[] = [
     label: 'AI-Powered',
     title: 'Waste Detection',
     description: 'AI identifies and classifies plastic waste instantly.',
-    desktopStyle: { left: '-7.5rem', top: '-1.5rem', '--card-rotation': '-3deg' } as React.CSSProperties,
+    desktopStyle: { left: '-11rem', top: '-4.5rem', '--card-rotation': '-2deg' } as React.CSSProperties,
     animationClass: 'float-one',
     fadeDelay: '0.1s',
     parallaxStrength: 1,
@@ -27,7 +27,7 @@ const featureCards: FeatureCard[] = [
     label: 'Instant',
     title: 'Reward Processing',
     description: 'Earn rewards immediately after verification.',
-    desktopStyle: { left: '-6rem', bottom: '0.5rem', '--card-rotation': '2deg' } as React.CSSProperties,
+    desktopStyle: { left: '-9.5rem', bottom: '-4.5rem', '--card-rotation': '2deg' } as React.CSSProperties,
     animationClass: 'float-three',
     fadeDelay: '0.22s',
     parallaxStrength: 0.95,
@@ -37,7 +37,7 @@ const featureCards: FeatureCard[] = [
     label: '95%',
     title: 'Recycling Accuracy',
     description: 'High-precision waste sorting with AI.',
-    desktopStyle: { right: '-7.5rem', top: '0rem', '--card-rotation': '3deg' } as React.CSSProperties,
+    desktopStyle: { right: '-11rem', top: '-4.5rem', '--card-rotation': '2deg' } as React.CSSProperties,
     animationClass: 'float-two',
     fadeDelay: '0.18s',
     parallaxStrength: 0.85,
@@ -47,7 +47,7 @@ const featureCards: FeatureCard[] = [
     label: '24/7',
     title: 'Smart Recycling Network',
     description: 'Always connected for continuous recycling.',
-    desktopStyle: { right: '-6rem', bottom: '2.5rem', '--card-rotation': '-2deg' } as React.CSSProperties,
+    desktopStyle: { right: '-9.5rem', bottom: '-4.5rem', '--card-rotation': '-2deg' } as React.CSSProperties,
     animationClass: 'float-four',
     fadeDelay: '0.28s',
     parallaxStrength: 0.75,
@@ -89,14 +89,17 @@ export default function FloatingFeatureCards() {
           >
             <article
               className={`floating-card ${card.animationClass} pointer-events-auto`}
-              style={{ '--fade-delay': card.fadeDelay } as React.CSSProperties}
+              style={{ '--fade-delay': card.fadeDelay, opacity: 1, backgroundColor: '#ffffff' } as React.CSSProperties}
             >
-              <div className="floating-card-inner rounded-3xl bg-white/10 backdrop-blur-[14px] p-3">
+              <div 
+                className="floating-card-inner rounded-3xl bg-white p-3.5 border border-slate-200/60 shadow-sm"
+                style={{ opacity: 1, backgroundColor: '#ffffff' }}
+              >
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 rounded-3xl bg-gradient-to-br from-emerald-200/60 to-brand-500/20 text-slate-900 text-base shadow-soft-glow">
                     {card.icon}
                   </div>
-                  <div className="rounded-full px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-800 bg-white/70 border border-white/80 backdrop-blur-sm">
+                  <div className="rounded-full px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-700 bg-slate-50 border border-slate-200/50">
                     {card.label}
                   </div>
                 </div>
@@ -117,14 +120,17 @@ export default function FloatingFeatureCards() {
           >
             <article
               className={`floating-card ${card.animationClass} pointer-events-auto`}
-              style={{ '--fade-delay': card.fadeDelay } as React.CSSProperties}
+              style={{ '--fade-delay': card.fadeDelay, opacity: 1, backgroundColor: '#ffffff' } as React.CSSProperties}
             >
-              <div className="floating-card-inner rounded-3xl bg-white/10 backdrop-blur-[14px] p-3">
+              <div 
+                className="floating-card-inner rounded-3xl bg-white p-3.5 border border-slate-200/60 shadow-sm"
+                style={{ opacity: 1, backgroundColor: '#ffffff' }}
+              >
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <div className="flex items-center justify-center w-10 h-10 rounded-3xl bg-gradient-to-br from-emerald-200/60 to-brand-500/20 text-slate-900 text-base shadow-soft-glow">
                     {card.icon}
                   </div>
-                  <div className="rounded-full px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-800 bg-white/70 border border-white/80 backdrop-blur-sm">
+                  <div className="rounded-full px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-700 bg-slate-50 border border-slate-200/50">
                     {card.label}
                   </div>
                 </div>

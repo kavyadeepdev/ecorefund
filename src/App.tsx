@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Recycle, Smartphone, Coins, AlertTriangle, 
-  ArrowRight, ShieldCheck, Truck, Factory, Leaf, TrendingUp
+  Recycle, Smartphone, Coins, 
+  ArrowRight, ShieldCheck, Truck, Factory, Leaf
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import DigitalTwin from './components/DigitalTwin';
@@ -9,13 +9,47 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Section from './components/Section';
 import MetricCard from './components/MetricCard';
-import FloatingFeatureCards from './components/FloatingFeatureCards';
 import ThreeDGlobe from './components/ThreeDGlobe';
-import PerformanceDashboard from './components/PerformanceDashboard';
-import AnimatedCounter from './components/AnimatedCounter';
 
 export default function App() {
   const [showDigitalTwin, setShowDigitalTwin] = useState(false);
+  const [activeTab, setActiveTab] = useState<'epr' | 'material' | 'carbon'>('epr');
+
+  const revenueStreams = [
+    {
+      id: 'epr' as const,
+      title: 'EPR Subsidies',
+      value: '60%',
+      label: 'Funded by FMCG brands for legal compliance',
+      icon: Coins,
+      bgColor: 'bg-emerald-50',
+      textColor: 'text-emerald-700',
+      borderColor: 'border-emerald-200',
+      explanation: 'Indian law mandates brands to pull back a percentage of the plastic they put into the market. Brands will pay the DRS platform a premium to acquire verifiable "EPR Credits" because DRS provides clean, traceable source material unlike the mixed landfill dumps.'
+    },
+    {
+      id: 'material' as const,
+      title: 'Material Sales',
+      value: '30%',
+      label: 'Revenue from selling clean scrap to recyclers',
+      icon: Truck,
+      bgColor: 'bg-amber-50',
+      textColor: 'text-amber-700',
+      borderColor: 'border-amber-200',
+      explanation: 'Because the waste is 100% source-segregated, it doesn\'t need expensive multi-stage manual sorting to remove food contamination. Clean PET/Paper commands a 30-50% price premium from industrial recyclers compared to municipal solid waste.'
+    },
+    {
+      id: 'carbon' as const,
+      title: 'Gov & Carbon Credits',
+      value: '10%',
+      label: 'Swachh Bharat grants & voluntary carbon markets',
+      icon: Recycle,
+      bgColor: 'bg-cyan-50',
+      textColor: 'text-cyan-700',
+      borderColor: 'border-cyan-200',
+      explanation: 'Government grants from the Swachh Bharat Mission and municipal contracts cover local infrastructure setups. Voluntary carbon markets provide additional revenue streams by issuing high-quality offsets for verified methane avoidance and plastic recovery.'
+    }
+  ];
 
   return (
     <AnimatePresence mode="wait">
@@ -47,12 +81,12 @@ export default function App() {
           {/* Navigation */}
           <Navbar onLaunchDigitalTwin={() => setShowDigitalTwin(true)} />
 
-          <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32 relative z-10">
+          <main className="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-32 relative z-10">
             {/* Hero Section */}
             <section id="vision" className="relative pb-16 md:pb-24 overflow-visible">
-              <div className="grid md:grid-cols-12 gap-12 items-center">
+              <div className="grid md:grid-cols-12 gap-16 lg:gap-24 items-center">
                 {/* Left Side: Hero Text */}
-                <div className="md:col-span-7 space-y-8 text-left relative z-10 max-w-xl">
+                <div className="md:col-span-6 space-y-8 text-left relative z-10 max-w-xl md:pr-12">
                   <div className="space-y-6">
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
@@ -106,48 +140,13 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  className="md:col-span-5 flex justify-end items-center relative"
+                  className="md:col-span-6 flex justify-center items-center relative md:pl-12"
                 >
                   <div className="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-cyan-500/5 rounded-full blur-2xl -z-10" />
                   <ThreeDGlobe />
-                  <FloatingFeatureCards />
                 </motion.div>
               </div>
             </section>
-
-            {/* National Telemetry Stats Grid */}
-            <motion.section 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white/70 backdrop-blur-md border border-slate-200/50 p-8 rounded-3xl shadow-sm"
-            >
-              <div className="text-center md:border-r border-slate-100 last:border-0 py-2">
-                <div className="text-3xl md:text-4xl font-display font-bold text-brand-600 mb-1.5">
-                  <AnimatedCounter value={1428} suffix=" Tons" />
-                </div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Waste Recycled</p>
-              </div>
-              <div className="text-center md:border-r border-slate-100 last:border-0 py-2">
-                <div className="text-3xl md:text-4xl font-display font-bold text-brand-600 mb-1.5">
-                  <AnimatedCounter value={1245250} prefix="₹" />
-                </div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Instant Payouts</p>
-              </div>
-              <div className="text-center md:border-r border-slate-100 last:border-0 py-2">
-                <div className="text-3xl md:text-4xl font-display font-bold text-brand-600 mb-1.5">
-                  <AnimatedCounter value={84520} suffix=" kg" />
-                </div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">CO2 Emissions Saved</p>
-              </div>
-              <div className="text-center py-2">
-                <div className="text-3xl md:text-4xl font-display font-bold text-brand-600 mb-1.5">
-                  <AnimatedCounter value={45210} suffix="+" />
-                </div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Citizens</p>
-              </div>
-            </motion.section>
 
             {/* The Mechanism */}
             <Section id="mechanism" title="The Mechanism" icon={Recycle}>
@@ -179,10 +178,6 @@ export default function App() {
               </div>
             </Section>
 
-            {/* Performance Telemetry section */}
-            <Section id="performance" title="Performance Telemetry" icon={TrendingUp}>
-              <PerformanceDashboard />
-            </Section>
 
             {/* Tech Stack */}
             <Section id="tech" title="Proposed Tech Stack" icon={Smartphone}>
@@ -238,33 +233,94 @@ export default function App() {
 
             {/* Economic Model */}
             <Section id="economy" title="Economic Model" icon={Coins}>
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
-                <MetricCard title="EPR Subsidies" value="60%" label="Funded by FMCG brands for legal compliance" />
-                <MetricCard title="Material Sales" value="30%" label="Revenue from selling clean scrap to recyclers" />
-                <MetricCard title="Gov/Carbon Credit" value="10%" label="Swachh Bharat grants & voluntary carbon markets" />
-              </div>
-
-              <div className="bg-white border text-slate-700 border-slate-200/80 rounded-3xl p-8 shadow-sm space-y-6">
-                <div className="flex gap-4">
-                   <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center shrink-0">
-                     <Coins className="w-6 h-6" />
-                   </div>
-                   <div>
-                     <h4 className="text-xl font-bold text-slate-900 mb-2">1. Extended Producer Responsibility (EPR)</h4>
-                     <p className="leading-relaxed">Indian law mandates brands to pull back a percentage of the plastic they put into the market. Brands will pay the DRS platform a premium to acquire verifiable "EPR Credits" because DRS provides clean, traceable source material unlike the mixed landfill dumps.</p>
-                   </div>
+              <div className="grid md:grid-cols-12 gap-8 items-stretch">
+                {/* Left Side: Interactive Tabs */}
+                <div className="md:col-span-5 flex flex-col gap-4">
+                  {revenueStreams.map((stream) => {
+                    const Icon = stream.icon;
+                    const isActive = activeTab === stream.id;
+                    return (
+                      <button
+                        key={stream.id}
+                        onClick={() => setActiveTab(stream.id)}
+                        className={`text-left p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-between group ${
+                          isActive 
+                            ? 'bg-white border-brand-500 shadow-md shadow-brand-500/5 translate-x-2' 
+                            : 'bg-white/50 border-slate-200 hover:border-slate-300 hover:bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                            isActive ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600'
+                          }`}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-900 text-sm md:text-base">{stream.title}</h4>
+                            <p className="text-slate-500 text-xs mt-0.5">{stream.label}</p>
+                          </div>
+                        </div>
+                        <div className={`text-2xl font-display font-extrabold ml-4 ${
+                          isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'
+                        }`}>
+                          {stream.value}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                
-                <hr className="border-slate-100" />
-                
-                <div className="flex gap-4">
-                   <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center shrink-0">
-                     <Truck className="w-6 h-6" />
-                   </div>
-                   <div>
-                     <h4 className="text-xl font-bold text-slate-900 mb-2">2. Selling High-Quality Raw Materials</h4>
-                     <p className="leading-relaxed">Because the waste is 100% source-segregated, it doesn't need expensive multi-stage manual sorting to remove food contamination. Clean PET/Paper commands a 30-50% price premium from industrial recyclers compared to municipal solid waste.</p>
-                   </div>
+
+                {/* Right Side: Tab Details Panel */}
+                <div className="md:col-span-7">
+                  <div className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm h-full flex flex-col justify-between relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-slate-50/50 -z-10 blur-3xl pointer-events-none" />
+                    
+                    <div className="space-y-6">
+                      {revenueStreams.map((stream) => {
+                        if (stream.id !== activeTab) return null;
+                        const Icon = stream.icon;
+                        return (
+                          <motion.div
+                            key={stream.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.25 }}
+                            className="space-y-6"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${stream.bgColor} ${stream.textColor} border ${stream.borderColor}`}>
+                                <Icon className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <span className={`text-xs font-bold uppercase tracking-widest ${stream.textColor}`}>
+                                  Revenue Stream
+                                </span>
+                                <h3 className="text-2xl font-display font-bold text-slate-900 mt-0.5">
+                                  {stream.title}
+                                </h3>
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+                              <div className="flex items-baseline gap-2 mb-3">
+                                <span className="text-4xl font-display font-extrabold text-slate-900">{stream.value}</span>
+                                <span className="text-sm font-semibold text-slate-500">financial contribution</span>
+                              </div>
+                              <p className="text-slate-600 leading-relaxed text-base font-medium">
+                                {stream.explanation}
+                              </p>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-6 mt-6 flex items-center justify-between text-xs text-slate-400 font-medium">
+                      <span>Interactive Economic breakdown</span>
+                      <span>Eco Refund DRS Proposal</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Section>
