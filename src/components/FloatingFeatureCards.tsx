@@ -91,7 +91,7 @@ export default function FloatingFeatureCards() {
               className={`floating-card ${card.animationClass} pointer-events-auto`}
               style={{ '--fade-delay': card.fadeDelay, opacity: 1, backgroundColor: '#ffffff' } as React.CSSProperties}
             >
-              <div 
+              <div
                 className="floating-card-inner rounded-3xl bg-white p-3.5 border border-slate-200/60 shadow-sm"
                 style={{ opacity: 1, backgroundColor: '#ffffff' }}
               >
@@ -122,7 +122,7 @@ export default function FloatingFeatureCards() {
               className={`floating-card ${card.animationClass} pointer-events-auto`}
               style={{ '--fade-delay': card.fadeDelay, opacity: 1, backgroundColor: '#ffffff' } as React.CSSProperties}
             >
-              <div 
+              <div
                 className="floating-card-inner rounded-3xl bg-white p-3.5 border border-slate-200/60 shadow-sm"
                 style={{ opacity: 1, backgroundColor: '#ffffff' }}
               >

@@ -37,10 +37,10 @@ export default function Footer() {
             Eco Refund is an open-source initiative. Explore the repository and contribute.
           </p>
           <div>
-            <a 
-              href="https://github.com/kavyadeepdev/ecorefund" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://github.com/kavyadeepdev/ecorefund"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-800 hover:border-slate-700 transition-all"
             >
               <Github className="w-4 h-4" /> View on GitHub
@@ -51,7 +51,7 @@ export default function Footer() {
 
       <div className="max-w-6xl mx-auto px-6 mt-12 pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
         <p className="text-slate-500">
-          &copy; {new Date().getFullYear()} Eco Refund India. Built for the Swachh Bharat Initiative.
+          &copy; {new Date().getFullYear()} Eco Refund. Built for the Swachh Bharat Initiative.
         </p>
         <p className="text-slate-500">
           Source code licensed under MIT.

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Recycle, Smartphone, Coins, 
+import {
+  Recycle, Smartphone, Coins,
   ArrowRight, ShieldCheck, Truck, Factory, Leaf
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -88,7 +88,7 @@ export default function App() {
                 {/* Left Side: Hero Text */}
                 <div className="md:col-span-6 space-y-8 text-left relative z-10 max-w-xl md:pr-12">
                   <div className="space-y-6">
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
@@ -97,8 +97,8 @@ export default function App() {
                       <Leaf className="w-4 h-4 text-brand-600" />
                       Policy Proposal
                     </motion.div>
-                    
-                    <motion.h1 
+
+                    <motion.h1
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
@@ -106,8 +106,8 @@ export default function App() {
                     >
                       A Tech-Enabled <span className="text-brand-600 bg-gradient-to-r from-brand-600 to-emerald-500 bg-clip-text text-transparent">Deposit Refund Scheme</span> for India
                     </motion.h1>
-                    
-                    <motion.p 
+
+                    <motion.p
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
@@ -117,7 +117,7 @@ export default function App() {
                     </motion.p>
                   </div>
 
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
@@ -126,8 +126,8 @@ export default function App() {
                     <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3 shadow-md hover:shadow-brand-500/20">
                       Explore Mechanism <ArrowRight className="w-5 h-5" />
                     </a>
-                    <button 
-                      onClick={() => setShowDigitalTwin(true)} 
+                    <button
+                      onClick={() => setShowDigitalTwin(true)}
                       className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-98"
                     >
                       Launch Digital Twin <Smartphone className="w-5 h-5 text-emerald-400 animate-pulse" />
@@ -136,7 +136,7 @@ export default function App() {
                 </div>
 
                 {/* Right Side: Interactive 3D Globe */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
@@ -152,7 +152,7 @@ export default function App() {
             <Section id="mechanism" title="The Mechanism" icon={Recycle}>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                  <div className="text-6xl font-display font-bold text-slate-100 absolute -top-4 -right-4 transition-transform group-hover:scale-110">01</div>
+                  <div className="text-6xl font-display font-bold text-slate-100 absolute top-2 right-4 transition-transform group-hover:scale-110">01</div>
                   <ShieldCheck className="w-10 h-10 text-brand-500 mb-6 relative z-10" />
                   <h3 className="text-xl font-bold mb-3 relative z-10">Source Segregation</h3>
                   <p className="text-slate-600 leading-relaxed relative z-10">
@@ -160,15 +160,15 @@ export default function App() {
                   </p>
                 </div>
                 <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                  <div className="text-6xl font-display font-bold text-slate-100 absolute -top-4 -right-4 transition-transform group-hover:scale-110">02</div>
+                  <div className="text-6xl font-display font-bold text-slate-100 absolute top-2 right-4 transition-transform group-hover:scale-110">02</div>
                   <Factory className="w-10 h-10 text-brand-500 mb-6 relative z-10" />
                   <h3 className="text-xl font-bold mb-3 relative z-10">RVM & Depot Drop-off</h3>
                   <p className="text-slate-600 leading-relaxed relative z-10">
-                    Users deposit waste at automated Reverse Vending Machines (RVMs) for standard items (bottles/cans) or local AI-weighing depots for bulk separated waste. At drop-off and sorting, segregated waste is routed back to the original product manufacturers to support Extended Producer Responsibility (EPR) compliance, while all other collected non-brand-specific materials are sold to recyclers or safely disposed of.
+                    Users deposit bottles and cans at automated RVMs, or bulk waste at local AI-weighing depots. Segregated materials are routed to brands for EPR compliance, while the rest are recycled.
                   </p>
                 </div>
                 <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                  <div className="text-6xl font-display font-bold text-slate-100 absolute -top-4 -right-4 transition-transform group-hover:scale-110">03</div>
+                  <div className="text-6xl font-display font-bold text-slate-100 absolute top-2 right-4 transition-transform group-hover:scale-110">03</div>
                   <Smartphone className="w-10 h-10 text-brand-500 mb-6 relative z-10" />
                   <h3 className="text-xl font-bold mb-3 relative z-10">Instant UPI Payout</h3>
                   <p className="text-slate-600 leading-relaxed relative z-10">
@@ -213,7 +213,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="space-y-8">
-                   <div>
+                    <div>
                       <h4 className="text-white font-semibold text-lg mb-2">Identity & Payments</h4>
                       <ul className="space-y-3">
                         <li className="flex items-start gap-3">
@@ -243,16 +243,14 @@ export default function App() {
                       <button
                         key={stream.id}
                         onClick={() => setActiveTab(stream.id)}
-                        className={`text-left p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-between group ${
-                          isActive 
-                            ? 'bg-white border-brand-500 shadow-md shadow-brand-500/5 translate-x-2' 
-                            : 'bg-white/50 border-slate-200 hover:border-slate-300 hover:bg-white'
-                        }`}
+                        className={`text-left p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-between group ${isActive
+                          ? 'bg-white border-brand-500 shadow-md shadow-brand-500/5 translate-x-2'
+                          : 'bg-white/50 border-slate-200 hover:border-slate-300 hover:bg-white'
+                          }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                            isActive ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600'
-                          }`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${isActive ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600'
+                            }`}>
                             <Icon className="w-5 h-5" />
                           </div>
                           <div>
@@ -260,9 +258,8 @@ export default function App() {
                             <p className="text-slate-500 text-xs mt-0.5">{stream.label}</p>
                           </div>
                         </div>
-                        <div className={`text-2xl font-display font-extrabold ml-4 ${
-                          isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'
-                        }`}>
+                        <div className={`text-2xl font-display font-extrabold ml-4 ${isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'
+                          }`}>
                           {stream.value}
                         </div>
                       </button>
@@ -274,7 +271,7 @@ export default function App() {
                 <div className="md:col-span-7">
                   <div className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm h-full flex flex-col justify-between relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-slate-50/50 -z-10 blur-3xl pointer-events-none" />
-                    
+
                     <div className="space-y-6">
                       {revenueStreams.map((stream) => {
                         if (stream.id !== activeTab) return null;
@@ -315,11 +312,6 @@ export default function App() {
                         );
                       })}
                     </div>
-
-                    <div className="border-t border-slate-100 pt-6 mt-6 flex items-center justify-between text-xs text-slate-400 font-medium">
-                      <span>Interactive Economic breakdown</span>
-                      <span>Eco Refund DRS Proposal</span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -340,7 +332,7 @@ export default function App() {
                     Addresses: Millions of informal ragpickers and waste workers who depend on mixed waste for livelihood
                   </p>
                 </div>
-                
+
                 <div className="bg-brand-50 border border-brand-100 rounded-3xl p-8">
                   <h3 className="text-xl font-bold text-brand-900 mb-3 flex items-center gap-2">
                     <ShieldCheck className="w-6 h-6" />
