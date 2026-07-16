@@ -34,23 +34,26 @@ export default function ThreeDGlobe() {
     let width = canvas.width;
     let height = canvas.height;
 
-    // Handle resizing
-    const resize = () => {
-      if (!canvas || !containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      // Keep canvas square based on container width
-      const size = Math.min(rect.width, 540);
-      canvas.width = size * window.devicePixelRatio;
-      canvas.height = size * window.devicePixelRatio;
-      canvas.style.width = `${size}px`;
-      canvas.style.height = `${size}px`;
-      width = canvas.width;
-      height = canvas.height;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    };
+    // Handle resizing using ResizeObserver to support dynamic grid and display visibility transitions
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const rect = entry.contentRect;
+        if (rect.width === 0) continue; // Ignore when container is hidden (e.g. mobile)
 
-    resize();
-    window.addEventListener('resize', resize);
+        const size = Math.min(rect.width, 540);
+        canvas.width = size * window.devicePixelRatio;
+        canvas.height = size * window.devicePixelRatio;
+        canvas.style.width = `${size}px`;
+        canvas.style.height = `${size}px`;
+        width = canvas.width;
+        height = canvas.height;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
 
     // Generate globe particles
     const particleCount = 750;
@@ -151,7 +154,7 @@ export default function ThreeDGlobe() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resize);
+      resizeObserver.disconnect();
     };
   }, []);
 

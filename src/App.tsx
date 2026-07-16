@@ -84,9 +84,9 @@ export default function App() {
           <main className="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-32 relative z-10">
             {/* Hero Section */}
             <section id="vision" className="relative pb-16 md:pb-24 overflow-visible">
-              <div className="grid md:grid-cols-12 gap-16 lg:gap-24 items-center">
+              <div className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-center">
                 {/* Left Side: Hero Text */}
-                <div className="md:col-span-6 space-y-8 text-left relative z-10 max-w-xl md:pr-12">
+                <div className="lg:col-span-6 space-y-8 text-center lg:text-left mx-auto lg:mx-0 relative z-10 max-w-xl lg:pr-12">
                   <div className="space-y-6">
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
@@ -95,7 +95,7 @@ export default function App() {
                       className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-sm font-semibold uppercase tracking-wider"
                     >
                       <Leaf className="w-4 h-4 text-brand-600" />
-                      Policy Proposal
+                      Project Pilot
                     </motion.div>
 
                     <motion.h1
@@ -121,7 +121,7 @@ export default function App() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="flex flex-wrap gap-4"
+                    className="flex flex-wrap gap-4 justify-center lg:justify-start"
                   >
                     <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3 shadow-md hover:shadow-brand-500/20">
                       Explore Mechanism <ArrowRight className="w-5 h-5" />
@@ -140,7 +140,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  className="md:col-span-6 flex justify-center items-center relative md:pl-12"
+                  className="hidden lg:flex lg:col-span-6 justify-center items-center relative lg:pl-12"
                 >
                   <div className="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-cyan-500/5 rounded-full blur-2xl -z-10" />
                   <ThreeDGlobe />
