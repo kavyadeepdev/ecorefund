@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Section from './components/Section';
 import MetricCard from './components/MetricCard';
+import FloatingFeatureCards from './components/FloatingFeatureCards';
 
 export default function App() {
   const [showDigitalTwin, setShowDigitalTwin] = useState(false);
@@ -23,30 +24,34 @@ export default function App() {
 
       <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32">
         {/* Hero Section */}
-        <section id="vision" className="space-y-8 max-w-3xl mx-auto text-center">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-sm font-semibold uppercase tracking-wide">
-              <Leaf className="w-4 h-4" />
-              Policy Proposal
-            </div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 leading-tight tracking-tight">
-              A Tech-Enabled <span className="text-brand-500">Deposit Refund Scheme</span> for India
-            </h1>
-            <p className="text-xl text-slate-600 leading-relaxed font-medium mx-auto">
-              A tech-enabled deposit refund scheme designed to incentivize proper waste disposal. Rewarding citizens with instant UPI payouts for 100% source-segregated waste.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3">
-                Explore Mechanism <ArrowRight className="w-5 h-5" />
-              </a>
-              <button 
-                onClick={() => setShowDigitalTwin(true)} 
-                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-98"
-              >
-                Launch Digital Twin <Smartphone className="w-5 h-5 text-emerald-400 animate-pulse" />
-              </button>
+        <section id="vision" className="relative pb-28 md:pb-32 overflow-visible">
+          <div className="space-y-8 max-w-3xl mx-auto text-center relative z-10">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-sm font-semibold uppercase tracking-wide">
+                <Leaf className="w-4 h-4" />
+                Policy Proposal
+              </div>
+              <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 leading-tight tracking-tight mb-6 hero-heading">
+                A Tech-Enabled <span className="text-brand-500">Deposit Refund Scheme</span> for India
+              </h1>
+              <p className="text-xl text-slate-600 leading-relaxed font-medium mx-auto">
+                A tech-enabled deposit refund scheme designed to incentivize proper waste disposal. Rewarding citizens with instant UPI payouts for 100% source-segregated waste.
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center mt-5">
+                <a href="#mechanism" className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all hover:gap-3">
+                  Explore Mechanism <ArrowRight className="w-5 h-5" />
+                </a>
+                <button 
+                  onClick={() => setShowDigitalTwin(true)} 
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-98"
+                >
+                  Launch Digital Twin <Smartphone className="w-5 h-5 text-emerald-400 animate-pulse" />
+                </button>
+              </div>
             </div>
           </div>
+
+          <FloatingFeatureCards />
         </section>
 
         {/* The Mechanism */}
