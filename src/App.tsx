@@ -71,7 +71,7 @@ export default function App() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           id="top"
-          className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900 bg-grid-pattern relative overflow-hidden"
+          className="min-h-screen font-sans selection:bg-brand-200 selection:text-brand-900 bg-grid-pattern relative overflow-clip"
         >
           {/* Background Ambient Glows */}
           <div className="glow-orb glow-orb-green w-[500px] h-[500px] -top-60 -left-60 pointer-events-none" />
