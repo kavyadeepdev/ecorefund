@@ -83,7 +83,7 @@ export default function App() {
 
           <main className="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-32 relative z-10">
             {/* Hero Section */}
-            <section id="vision" className="relative pb-16 md:pb-24 overflow-visible">
+            <section id="vision" className="relative pb-16 md:pb-24 overflow-visible scroll-mt-32">
               <div className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-center">
                 {/* Left Side: Hero Text */}
                 <div className="lg:col-span-6 space-y-8 text-center lg:text-left mx-auto lg:mx-0 relative z-10 max-w-xl lg:pr-12">
