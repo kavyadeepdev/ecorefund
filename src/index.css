@@ -4,7 +4,7 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  
+
   --color-brand-50: #f0fdf4;
   --color-brand-100: #dcfce7;
   --color-brand-500: #22c55e;
@@ -103,6 +103,7 @@ body {
     opacity: 0;
     transform: translateY(18px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -110,36 +111,48 @@ body {
 }
 
 @keyframes float-one {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-12px) rotate(-2deg);
   }
 }
 
 @keyframes float-two {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-18px) rotate(1deg);
   }
 }
 
 @keyframes float-three {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-15px) rotate(2deg);
   }
 }
 
 @keyframes float-four {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-10px) rotate(-1deg);
   }
@@ -170,4 +183,3 @@ body {
 .glow-orb-cyan {
   background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
 }
-
