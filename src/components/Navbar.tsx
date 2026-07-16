@@ -30,12 +30,36 @@ export default function Navbar({ onLaunchDigitalTwin }: NavbarProps) {
     { href: '#challenges', label: 'Roadmap' },
   ];
 
+  const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      setIsMobileMenuOpen(false);
+
+      if (href === '#vision') {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 80);
+      } else {
+        const targetId = href.replace('#', '');
+        const element = document.getElementById(targetId);
+        if (element) {
+          // Short timeout to let state update and menu closing transition begin
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }, 80);
+        }
+      }
+    }
+  };
+
   return (
     <nav 
       className={`sticky top-0 z-50 transition-all duration-300 w-full ${
-        isScrolled 
-          ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm py-3' 
-          : 'bg-transparent border-b border-transparent py-5'
+        (isScrolled || isMobileMenuOpen) 
+          ? 'bg-white/95 backdrop-blur-xl border-b border-slate-200/50 shadow-sm' 
+          : 'bg-transparent border-b border-transparent'
+      } ${
+        isScrolled ? 'py-3' : 'py-5'
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
@@ -55,6 +79,7 @@ export default function Navbar({ onLaunchDigitalTwin }: NavbarProps) {
             <a 
               key={link.href}
               href={link.href} 
+              onClick={(e) => handleNavLinkClick(e, link.href)}
               className="hover:text-brand-600 transition-colors"
             >
               {link.label}
@@ -90,20 +115,20 @@ export default function Navbar({ onLaunchDigitalTwin }: NavbarProps) {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-b border-slate-200"
+            className="md:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-b border-slate-200/50 shadow-lg absolute top-full left-0 right-0"
           >
             <div className="px-6 py-6 flex flex-col gap-4">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => handleNavLinkClick(e, link.href)}
                   className="text-base font-medium text-slate-600 hover:text-brand-600 transition-colors py-1"
                 >
                   {link.label}
                 </a>
               ))}
-              <hr className="border-slate-100 my-1" />
+              <hr className="border-slate-100/50 my-1" />
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
