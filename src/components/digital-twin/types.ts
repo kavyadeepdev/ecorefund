@@ -159,3 +159,55 @@ export const SUBCATEGORY_THEMES: Record<string, { border: string; bg: string; te
     dot: 'bg-rose-500'
   }
 };
+
+export interface BrandEprRecord {
+  brandName: string;
+  materialType: string;
+  totalWeightGrams: number;
+  itemsCount: number;
+  eprCreditsEarned: number;
+  targetWeightGrams: number;
+}
+
+export const INITIAL_EPR_DATA: BrandEprRecord[] = [
+  {
+    brandName: 'Bisleri',
+    materialType: 'plastic',
+    totalWeightGrams: 1850,
+    itemsCount: 74,
+    eprCreditsEarned: 1.85,
+    targetWeightGrams: 5000,
+  },
+  {
+    brandName: 'Amul',
+    materialType: 'plastic',
+    totalWeightGrams: 2200,
+    itemsCount: 40,
+    eprCreditsEarned: 2.20,
+    targetWeightGrams: 4000,
+  },
+  {
+    brandName: 'Coca-Cola',
+    materialType: 'glass',
+    totalWeightGrams: 6400,
+    itemsCount: 20,
+    eprCreditsEarned: 6.40,
+    targetWeightGrams: 10000,
+  },
+  {
+    brandName: 'Times of India',
+    materialType: 'paper',
+    totalWeightGrams: 3600,
+    itemsCount: 20,
+    eprCreditsEarned: 3.60,
+    targetWeightGrams: 6000,
+  },
+  {
+    brandName: 'Local Farms',
+    materialType: 'compostable',
+    totalWeightGrams: 900,
+    itemsCount: 10,
+    eprCreditsEarned: 0.90,
+    targetWeightGrams: 2000,
+  },
+];

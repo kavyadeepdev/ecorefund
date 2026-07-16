@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Recycle, Smartphone, Terminal } from 'lucide-react';
 import OpenAI from 'openai';
-import { DepositItem, RATES, MOCK_PRESETS, RvmMachine, MOCK_RVM_MACHINES } from './digital-twin/types';
+import { DepositItem, RATES, MOCK_PRESETS, RvmMachine, MOCK_RVM_MACHINES, BrandEprRecord, INITIAL_EPR_DATA } from './digital-twin/types';
 import CitizenMobileApp from './digital-twin/CitizenMobileApp';
 import SmartRvmCabinet from './digital-twin/SmartRvmCabinet';
 import OperatorConsole from './digital-twin/OperatorConsole';
@@ -81,6 +81,7 @@ export default function DigitalTwin({ onClose }: DigitalTwinProps) {
   const [currentSessionItems, setCurrentSessionItems] = useState<DepositItem[]>([]);
   const [chuteLocked, setChuteLocked] = useState(false);
   const [payoutStatus, setPayoutStatus] = useState<'idle' | 'processing' | 'success'>('idle');
+  const [eprBalances, setEprBalances] = useState<BrandEprRecord[]>(INITIAL_EPR_DATA);
 
   // Scanner Vision states
   const [cvScanning, setCvScanning] = useState(false);
@@ -583,6 +584,36 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
       addLog(`Instant settlement success: ₹${totalVal.toFixed(2)} sent via UPI routing.`, 'success');
       addLog(`[MQTT] post: rvm/001/payout_status {"status": "SUCCESS", "tx_id": "${newTx.id}"}`, 'mqtt');
 
+      // Update EPR balances
+      setEprBalances((prevBalances) => {
+        const nextBalances = [...prevBalances];
+        currentSessionItems.forEach((item) => {
+          const brandName = item.brand || 'Generic';
+          const matchIndex = nextBalances.findIndex(b => b.brandName.toLowerCase() === brandName.toLowerCase());
+
+          if (matchIndex !== -1) {
+            nextBalances[matchIndex] = {
+              ...nextBalances[matchIndex],
+              totalWeightGrams: nextBalances[matchIndex].totalWeightGrams + item.weightGrams,
+              itemsCount: nextBalances[matchIndex].itemsCount + 1,
+              eprCreditsEarned: parseFloat((nextBalances[matchIndex].eprCreditsEarned + (item.weightGrams / 1000)).toFixed(3))
+            };
+          } else {
+            nextBalances.push({
+              brandName,
+              materialType: item.type,
+              totalWeightGrams: item.weightGrams,
+              itemsCount: 1,
+              eprCreditsEarned: parseFloat((item.weightGrams / 1000).toFixed(3)),
+              targetWeightGrams: 3000
+            });
+          }
+
+          addLog(`[MQTT] post: rvm/001/epr_update {"brand": "${brandName}", "weight_g": ${item.weightGrams}, "credits": ${(item.weightGrams / 1000).toFixed(3)}}`, 'mqtt');
+        });
+        return nextBalances;
+      });
+
       setTimeout(() => {
         setCurrentSessionItems([]);
         setPayoutStatus('idle');
@@ -693,6 +724,7 @@ Do not return any markdown formatting outside the JSON block. Return ONLY the ra
             setBinFullness={setBinFullness}
             logs={logs}
             addLog={addLog}
+            eprBalances={eprBalances}
           />
         </div>
 
