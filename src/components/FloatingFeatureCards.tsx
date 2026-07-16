@@ -17,7 +17,7 @@ const featureCards: FeatureCard[] = [
     label: 'AI-Powered',
     title: 'Waste Detection',
     description: 'AI identifies and classifies plastic waste instantly.',
-    desktopStyle: { left: 'calc(50% - 41rem)', top: '2rem', '--card-rotation': '-2deg' } as React.CSSProperties,
+    desktopStyle: { left: '-7.5rem', top: '-1.5rem', '--card-rotation': '-3deg' } as React.CSSProperties,
     animationClass: 'float-one',
     fadeDelay: '0.1s',
     parallaxStrength: 1,
@@ -27,7 +27,7 @@ const featureCards: FeatureCard[] = [
     label: 'Instant',
     title: 'Reward Processing',
     description: 'Earn rewards immediately after verification.',
-    desktopStyle: { left: 'calc(50% - 41rem)', bottom: '4.5rem', '--card-rotation': '1deg' } as React.CSSProperties,
+    desktopStyle: { left: '-6rem', bottom: '0.5rem', '--card-rotation': '2deg' } as React.CSSProperties,
     animationClass: 'float-three',
     fadeDelay: '0.22s',
     parallaxStrength: 0.95,
@@ -37,7 +37,7 @@ const featureCards: FeatureCard[] = [
     label: '95%',
     title: 'Recycling Accuracy',
     description: 'High-precision waste sorting with AI.',
-    desktopStyle: { right: 'calc(50% - 41rem)', top: '3rem', '--card-rotation': '2deg' } as React.CSSProperties,
+    desktopStyle: { right: '-7.5rem', top: '0rem', '--card-rotation': '3deg' } as React.CSSProperties,
     animationClass: 'float-two',
     fadeDelay: '0.18s',
     parallaxStrength: 0.85,
@@ -47,7 +47,7 @@ const featureCards: FeatureCard[] = [
     label: '24/7',
     title: 'Smart Recycling Network',
     description: 'Always connected for continuous recycling.',
-    desktopStyle: { right: 'calc(50% - 41rem)', bottom: '3.5rem', '--card-rotation': '-1deg' } as React.CSSProperties,
+    desktopStyle: { right: '-6rem', bottom: '2.5rem', '--card-rotation': '-2deg' } as React.CSSProperties,
     animationClass: 'float-four',
     fadeDelay: '0.28s',
     parallaxStrength: 0.75,
@@ -78,19 +78,17 @@ export default function FloatingFeatureCards() {
   return (
     <div
       ref={wrapperRef}
-      className="floating-cards-overlay relative z-0 pointer-events-auto md:absolute md:inset-0"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      className="floating-cards-overlay relative z-10 pointer-events-none md:absolute md:inset-0"
     >
       <div className="hidden md:block absolute inset-0">
         {featureCards.map((card) => (
           <div
             key={card.title}
-            className="floating-card-shell absolute w-56"
+            className="floating-card-shell absolute w-56 pointer-events-none"
             style={{ ...card.desktopStyle, '--parallax-strength': card.parallaxStrength } as React.CSSProperties}
           >
             <article
-              className={`floating-card ${card.animationClass}`}
+              className={`floating-card ${card.animationClass} pointer-events-auto`}
               style={{ '--fade-delay': card.fadeDelay } as React.CSSProperties}
             >
               <div className="floating-card-inner rounded-3xl bg-white/10 backdrop-blur-[14px] p-3">
@@ -114,11 +112,11 @@ export default function FloatingFeatureCards() {
         {featureCards.map((card) => (
           <div
             key={card.title}
-            className="floating-card-shell relative w-[min(86vw,13.5rem)] max-w-[13.5rem]"
+            className="floating-card-shell relative w-[min(86vw,13.5rem)] max-w-[13.5rem] pointer-events-none"
             style={{ '--parallax-strength': card.parallaxStrength } as React.CSSProperties}
           >
             <article
-              className={`floating-card ${card.animationClass}`}
+              className={`floating-card ${card.animationClass} pointer-events-auto`}
               style={{ '--fade-delay': card.fadeDelay } as React.CSSProperties}
             >
               <div className="floating-card-inner rounded-3xl bg-white/10 backdrop-blur-[14px] p-3">
