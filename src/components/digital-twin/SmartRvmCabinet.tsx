@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   Recycle, Lock, Upload, RefreshCw, ShieldAlert, 
-  ShieldCheck, AlertTriangle, Check, Send 
+  ShieldCheck, AlertTriangle, Check, Send, Camera, Image 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DepositItem, MOCK_PRESETS, RvmMachine, SUBCATEGORY_THEMES } from './types';
@@ -49,6 +49,21 @@ export default function SmartRvmCabinet({
   handleCalibrateManual,
 }: SmartRvmCabinetProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const mobileQuery = window.matchMedia('(max-width: 1024px)');
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsMobileOrTablet(mobileQuery.matches || hasTouch);
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
 
   const totalSessionPayout = currentSessionItems.reduce((acc, item) => acc + item.val, 0);
   const totalSessionWeight = currentSessionItems.reduce((acc, item) => acc + item.weightGrams, 0);
@@ -212,25 +227,63 @@ export default function SmartRvmCabinet({
             </div>
           ) : (
             // Empty Upload trigger state
-            <div className="z-10 flex flex-col items-center justify-center p-4 text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500 group-hover:text-emerald-400 group-hover:border-emerald-500/40 transition-colors">
-                <Upload className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-300">Drag & Drop or Click to Upload</p>
-                <p className="text-[9px] text-slate-500 font-mono mt-0.5">JPEG, PNG or preset items below</p>
-              </div>
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:text-emerald-400 text-slate-400 text-[10px] font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-              >
-                Choose Waste Image
-              </button>
+            <div className="z-10 flex flex-col items-center justify-center p-4 text-center space-y-2.5">
+              {isMobileOrTablet ? (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-300">Click Photo or Select Image</p>
+                    <p className="text-[9px] text-slate-500 font-mono mt-0.5">Use your device camera or gallery</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 px-3.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-950/20"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      Take Photo
+                    </button>
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:text-emerald-400 text-slate-400 text-[10px] font-bold py-1.5 px-3.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Image className="w-3.5 h-3.5" />
+                      Gallery
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-300">Drag & Drop or Click to Upload</p>
+                    <p className="text-[9px] text-slate-500 font-mono mt-0.5">JPEG, PNG or preset items below</p>
+                  </div>
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:text-emerald-400 text-slate-400 text-[10px] font-bold py-1.5 px-3.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Choose Waste Image
+                  </button>
+                </>
+              )}
               <input 
                 type="file" 
                 ref={fileInputRef} 
                 className="hidden" 
                 accept="image/*" 
+                onChange={handleFileUpload} 
+              />
+              <input 
+                type="file" 
+                ref={cameraInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                capture="environment" 
                 onChange={handleFileUpload} 
               />
             </div>
